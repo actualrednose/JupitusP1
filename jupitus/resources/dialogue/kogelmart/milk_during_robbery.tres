@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3 uid="uid://qnyta8131g65"]
+
+[ext_resource type="Script" uid="uid://bkmif1qkyfocw" path="res://scripts/dialogue/dialogue_line.gd" id="1_3arla"]
+[ext_resource type="Script" uid="uid://ddcy6t67u525" path="res://scripts/dialogue/dialogue_choice.gd" id="2_372uc"]
+[ext_resource type="Script" uid="uid://bnic7bnq1fb5c" path="res://scripts/dialogue/dialogue_data.gd" id="2_nhx0a"]
+[ext_resource type="Resource" uid="uid://byv0nuncpcc22" path="res://resources/dialogue/characters/Emm.tres" id="3_vp1w6"]
+
+[sub_resource type="Resource" id="Resource_372uc"]
+script = ExtResource("1_3arla")
+speaker = ExtResource("3_vp1w6")
+text = "Well here's the milk."
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_vp1w6"]
+script = ExtResource("1_3arla")
+speaker = ExtResource("3_vp1w6")
+text = "Fat chance of buying this while the store's being robbed though."
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[resource]
+script = ExtResource("2_nhx0a")
+lines = Array[ExtResource("1_3arla")]([SubResource("Resource_372uc"), SubResource("Resource_vp1w6")])
+metadata/_custom_type_script = "uid://bnic7bnq1fb5c"

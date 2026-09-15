@@ -1,8 +1,22 @@
 [gd_scene format=3 uid="uid://do6usi0e6vdks"]
 
 [ext_resource type="Script" uid="uid://cscaqj7hdtdk2" path="res://scripts/camera/stage_camera.gd" id="1_rm8ds"]
+[ext_resource type="Texture2D" uid="uid://b3nnl17ouju5x" path="res://resources/sprites/environmental/kogelmart/floor.png" id="2_o8yeu"]
 [ext_resource type="Texture2D" uid="uid://b7xequfddljd6" path="res://resources/sprites/environmental/kogelmart/Skyline.png" id="3_rm8ds"]
 [ext_resource type="PackedScene" uid="uid://vgdqftmjjxgq" path="res://scenes/player.tscn" id="3_xmejl"]
+[ext_resource type="Texture2D" uid="uid://gmnskd4xqopv" path="res://resources/sprites/environmental/kogelmart/Fridges.png" id="4_5o2a2"]
+[ext_resource type="Texture2D" uid="uid://b3asc3kph64w" path="res://resources/sprites/environmental/kogelmart/Shelve big.png" id="4_xmejl"]
+[ext_resource type="Texture2D" uid="uid://xrxug6k6ny1p" path="res://resources/sprites/environmental/kogelmart/ShelveSmall.png" id="5_28ksu"]
+[ext_resource type="Script" uid="uid://d3a83b7v6ytes" path="res://scripts/actor/milk_interactable.gd" id="8_22vjl"]
+[ext_resource type="Resource" uid="uid://qnyta8131g65" path="res://resources/dialogue/kogelmart/milk_during_robbery.tres" id="9_gigyx"]
+[ext_resource type="Script" uid="uid://d1fculjemgye" path="res://scripts/cutscene/cutscene_player.gd" id="10_ng2d6"]
+[ext_resource type="Script" uid="uid://e4nee2wiehds" path="res://scripts/cutscene/cutscene_action.gd" id="11_v2hqh"]
+[ext_resource type="Script" uid="uid://bkmif1qkyfocw" path="res://scripts/dialogue/dialogue_line.gd" id="12_4xk5b"]
+[ext_resource type="Script" uid="uid://ddcy6t67u525" path="res://scripts/dialogue/dialogue_choice.gd" id="13_7dxde"]
+[ext_resource type="Script" uid="uid://bnic7bnq1fb5c" path="res://scripts/dialogue/dialogue_data.gd" id="14_ykydi"]
+[ext_resource type="Script" uid="uid://deq5ipwsf8rv7" path="res://scripts/cutscene/cutscene_action_dialogue.gd" id="15_x36dm"]
+[ext_resource type="Script" uid="uid://dawlns8gfr3sk" path="res://scripts/cutscene/cutscene_action_set_flag.gd" id="16_h7tew"]
+[ext_resource type="Script" uid="uid://colgw8jbic88g" path="res://scripts/cutscene/cutscene_trigger.gd" id="17_v2hqh"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8xg12"]
 albedo_color = Color(0.16206557, 0.1620656, 0.16206557, 1)
@@ -11,6 +25,10 @@ albedo_color = Color(0.16206557, 0.1620656, 0.16206557, 1)
 material = SubResource("StandardMaterial3D_8xg12")
 size = Vector2(20, 20)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5o2a2"]
+albedo_texture = ExtResource("2_o8yeu")
+uv1_scale = Vector3(7.4, 7.4, 7.4)
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_5o2a2"]
 size = Vector3(11.02, 0.1, 4.95)
 
@@ -18,10 +36,32 @@ size = Vector3(11.02, 0.1, 4.95)
 background_mode = 2
 ambient_light_source = 2
 ambient_light_color = Color(0.5941452, 0.8557213, 0.98944825, 1)
-ambient_light_energy = 0.5
+ambient_light_energy = 0.1
+
+[sub_resource type="BoxMesh" id="BoxMesh_1nagh"]
+size = Vector3(0.5887451, 2.5860596, 4.4744873)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tbuv2"]
+albedo_color = Color(0.41034183, 0.31449044, 0.2957249, 1)
+metallic = 0.35
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1nagh"]
+size = Vector3(0.45306396, 2.5698853, 4.407959)
 
 [sub_resource type="BoxMesh" id="BoxMesh_jjimy"]
 size = Vector3(2.74, 0.695, 0.105)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xmejl"]
+albedo_color = Color(0.20871013, 0.20871016, 0.20871013, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_rm8ds"]
+size = Vector3(2.7292347, 0.69836426, 0.10296631)
+
+[sub_resource type="BoxMesh" id="BoxMesh_o8yeu"]
+size = Vector3(2.11, 0.695, 0.105)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_aen8j"]
+size = Vector3(2.0871048, 0.69836426, 0.10296631)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_01fuj"]
 albedo_color = Color(0.585062, 0.585062, 0.5850621, 1)
@@ -46,6 +86,43 @@ size = Vector3(0.2, 3.0375977, 4.93)
 [sub_resource type="BoxShape3D" id="BoxShape3D_jjimy"]
 size = Vector3(11.34, 3.39, 0.105)
 
+[sub_resource type="BoxMesh" id="BoxMesh_aen8j"]
+size = Vector3(10.999756, 0.17773438, 5.010254)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tbuv2"]
+size = Vector3(2.0390015, 0.55078125, 0.48242188)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5o2a2"]
+size = Vector3(2.1737976, 0.12402344, 0.6582031)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_tbuv2"]
+size = Vector3(2.1209717, 1, 1.512207)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_73cvo"]
+size = Vector3(0.7821045, 0.722229, 1.1306839)
+
+[sub_resource type="Resource" id="Resource_jjimy"]
+script = ExtResource("12_4xk5b")
+text = "Robbery in Progress."
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_3x8d0"]
+script = ExtResource("14_ykydi")
+lines = Array[ExtResource("12_4xk5b")]([SubResource("Resource_jjimy")])
+metadata/_custom_type_script = "uid://bnic7bnq1fb5c"
+
+[sub_resource type="Resource" id="Resource_01fuj"]
+script = ExtResource("15_x36dm")
+dialogue = SubResource("Resource_3x8d0")
+metadata/_custom_type_script = "uid://deq5ipwsf8rv7"
+
+[sub_resource type="Resource" id="Resource_aen8j"]
+script = ExtResource("16_h7tew")
+flag_name = "robbery_in_progress"
+metadata/_custom_type_script = "uid://dawlns8gfr3sk"
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1eb1t"]
+
 [node name="KogelMart" type="Node3D" unique_id=1560995785]
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=452366543]
@@ -59,12 +136,13 @@ follow_smoothing = 0.7
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Floor" unique_id=87337548]
 transform = Transform3D(0.55366856, 0, 0, 0, 1, 0, 0, 0, 0.2491031, 0, 0, 0)
 mesh = SubResource("PlaneMesh_28ksu")
+surface_material_override/0 = SubResource("StandardMaterial3D_5o2a2")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=478143571]
 shape = SubResource("BoxShape3D_5o2a2")
 
 [node name="Player" parent="." unique_id=1266291996 instance=ExtResource("3_xmejl")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4548593, 0.7184768, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.255884, 0.7184768, -1.8361237)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1927001214]
 transform = Transform3D(-0.99516666, -0.069438234, 0.069438234, -0.017095927, 0.8188155, 0.5738021, -0.09670091, 0.5698416, -0.81604505, 0, 3.827786, -19.892654)
@@ -79,24 +157,106 @@ directional_shadow_max_distance = 8.6
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1153083341]
 environment = SubResource("Environment_rm8ds")
 
-[node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=1288905400]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1817422, 2.6231236, 0)
-light_color = Color(0.93738717, 0.6434247, 0.24621588, 1)
-light_energy = 1.772
+[node name="CeilingLight" type="OmniLight3D" parent="." unique_id=1288905400]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1817422, 2.6416523, 0)
+light_color = Color(0.41141254, 0.7806603, 0.807375, 1)
+light_energy = 1.481
+shadow_enabled = true
 
-[node name="OmniLight3D2" type="OmniLight3D" parent="." unique_id=1611775244]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.7303257, 2.667279, 0.041797876)
-light_color = Color(0.93738717, 0.6434247, 0.24621588, 1)
-light_energy = 1.772
+[node name="CeilingLight2" type="OmniLight3D" parent="." unique_id=686515042]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8656936, 2.6416523, 0)
+light_color = Color(0.41141254, 0.7806603, 0.807375, 1)
+light_energy = 1.481
+shadow_enabled = true
+
+[node name="Fridges" type="MeshInstance3D" parent="." unique_id=1371412154]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.329216, 1.2951546, -0.17827511)
+mesh = SubResource("BoxMesh_1nagh")
+surface_material_override/0 = SubResource("StandardMaterial3D_tbuv2")
+
+[node name="Sprite3D" type="Sprite3D" parent="Fridges" unique_id=1253224163]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0.2962818, 0, 0)
+texture = ExtResource("4_5o2a2")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Fridges" unique_id=1619131913]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fridges/StaticBody3D" unique_id=477900584]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06436157, 0.01889038, -0.0032958984)
+shape = SubResource("BoxShape3D_1nagh")
 
 [node name="Aisle Shelves" type="Node3D" parent="." unique_id=53611076]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.018430948, 0.23371863, -2.5122795)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Aisle Shelves" unique_id=1911484687]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1334987, 0.12384009, 1.7586081)
+[node name="Shelve1" type="MeshInstance3D" parent="Aisle Shelves" unique_id=1911484687]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4586928, 0.12384009, 1.7586081)
 mesh = SubResource("BoxMesh_jjimy")
+surface_material_override/0 = SubResource("StandardMaterial3D_xmejl")
+
+[node name="FrontFace" type="Sprite3D" parent="Aisle Shelves/Shelve1" unique_id=1568924694]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.05483699)
+shaded = true
+texture = ExtResource("4_xmejl")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Aisle Shelves/Shelve1" unique_id=153820477]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1519296, -0.35755873, 0.7536714)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Aisle Shelves/Shelve1/StaticBody3D" unique_id=1740202724]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1494422, 0.35218215, -0.7521405)
+shape = SubResource("BoxShape3D_rm8ds")
+
+[node name="Shelve4" type="MeshInstance3D" parent="Aisle Shelves" unique_id=1873039074]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4586928, 0.12384009, 3.6181703)
+mesh = SubResource("BoxMesh_jjimy")
+surface_material_override/0 = SubResource("StandardMaterial3D_xmejl")
+
+[node name="FrontFace" type="Sprite3D" parent="Aisle Shelves/Shelve4" unique_id=1435499810]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.05483699)
+shaded = true
+texture = ExtResource("4_xmejl")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Aisle Shelves/Shelve4" unique_id=1789167803]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1519296, -0.35755873, 0.7536714)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Aisle Shelves/Shelve4/StaticBody3D" unique_id=2095255423]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1494422, 0.35218215, -0.7521405)
+shape = SubResource("BoxShape3D_rm8ds")
+
+[node name="Shelve2" type="MeshInstance3D" parent="Aisle Shelves" unique_id=73491598]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0800242, 0.12384009, 1.7586081)
+mesh = SubResource("BoxMesh_o8yeu")
+surface_material_override/0 = SubResource("StandardMaterial3D_xmejl")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Aisle Shelves/Shelve2" unique_id=642085299]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1519296, -0.35755873, 0.7536714)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Aisle Shelves/Shelve2/StaticBody3D" unique_id=1497920880]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1596074, 0.35218215, -0.7521405)
+shape = SubResource("BoxShape3D_aen8j")
+
+[node name="FrontFace" type="Sprite3D" parent="Aisle Shelves/Shelve2" unique_id=432231412]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.06358671)
+shaded = true
+texture = ExtResource("5_28ksu")
+
+[node name="Shelve3" type="MeshInstance3D" parent="Aisle Shelves" unique_id=1539387167]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0800242, 0.12384009, 3.598135)
+mesh = SubResource("BoxMesh_o8yeu")
+surface_material_override/0 = SubResource("StandardMaterial3D_xmejl")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Aisle Shelves/Shelve3" unique_id=479799397]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1519296, -0.35755873, 0.7536714)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Aisle Shelves/Shelve3/StaticBody3D" unique_id=629043057]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1596074, 0.35218215, -0.7521405)
+shape = SubResource("BoxShape3D_aen8j")
+
+[node name="FrontFace" type="Sprite3D" parent="Aisle Shelves/Shelve3" unique_id=681121472]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.06358671)
+shaded = true
+texture = ExtResource("5_28ksu")
 
 [node name="Walls" type="Node3D" parent="." unique_id=1737348445]
+visible = false
 
 [node name="NorthWindow" type="Sprite3D" parent="Walls" unique_id=754119455]
 transform = Transform3D(1.01, 0, 0, 0, 1.01, 0, 0, 0, 1.01, -0.02459925, 1.3822159, -2.569)
@@ -119,12 +279,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.291243, 1.3946143, -2.5159
 mesh = SubResource("BoxMesh_rm8ds")
 
 [node name="West Wall" type="MeshInstance3D" parent="Walls" unique_id=401168263]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.59493, 3.022797, 0.0029177964)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.59493, 3.1903296, 0.0029177964)
 mesh = SubResource("BoxMesh_3x8d0")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Walls/West Wall" unique_id=1281764563]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/West Wall/StaticBody3D" unique_id=1449200796]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.4605505, 0)
 shape = SubResource("BoxShape3D_3x8d0")
 
 [node name="West Wall2" type="MeshInstance3D" parent="Walls" unique_id=357978449]
@@ -134,6 +295,7 @@ mesh = SubResource("BoxMesh_3x8d0")
 [node name="StaticBody3D" type="StaticBody3D" parent="Walls/West Wall2" unique_id=1914327273]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Walls/West Wall2/StaticBody3D" unique_id=582390201]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5990648, 0)
 shape = SubResource("BoxShape3D_3x8d0")
 
 [node name="NorthWallCollision" type="StaticBody3D" parent="Walls" unique_id=141647585]
@@ -157,3 +319,45 @@ mesh = SubResource("BoxMesh_01fuj")
 [node name="NorthWall6" type="MeshInstance3D" parent="Walls" unique_id=1632736932]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.018430948, 4.25386, -2.5122795)
 mesh = SubResource("BoxMesh_01fuj")
+
+[node name="Ceiling" type="MeshInstance3D" parent="." unique_id=979847907]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.3446088, -0.021728516)
+mesh = SubResource("BoxMesh_aen8j")
+
+[node name="Store Counter" type="Node3D" parent="." unique_id=87145978]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Store Counter" unique_id=1304431966]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.49112, 0.22460938, -1.3611614)
+mesh = SubResource("BoxMesh_tbuv2")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Store Counter" unique_id=523796050]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.423722, 0.54454863, -1.2732707)
+mesh = SubResource("BoxMesh_5o2a2")
+
+[node name="Collision" type="StaticBody3D" parent="Store Counter/MeshInstance3D2" unique_id=2084292941]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Store Counter/MeshInstance3D2/Collision" unique_id=1433399914]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.023254395, 0, -0.41430664)
+shape = SubResource("BoxShape3D_tbuv2")
+
+[node name="MilkInteractable" type="Area3D" parent="." unique_id=1952015501]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.8677907, 0.30836225, 1.4469712)
+script = ExtResource("8_22vjl")
+robbery_dialogue = ExtResource("9_gigyx")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MilkInteractable" unique_id=1134998728]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.108947754, 0.02279663, 0.029132843)
+shape = SubResource("BoxShape3D_73cvo")
+
+[node name="RobberyCutscene" type="Node" parent="." unique_id=1211326049]
+script = ExtResource("10_ng2d6")
+actions = Array[ExtResource("11_v2hqh")]([SubResource("Resource_01fuj"), SubResource("Resource_aen8j")])
+
+[node name="Area3D" type="Area3D" parent="RobberyCutscene" unique_id=1205303202 node_paths=PackedStringArray("cutscene_player")]
+collision_layer = 2
+script = ExtResource("17_v2hqh")
+cutscene_player = NodePath("..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RobberyCutscene/Area3D" unique_id=920015894]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.262538, 0, -2.0273101)
+shape = SubResource("BoxShape3D_1eb1t")
