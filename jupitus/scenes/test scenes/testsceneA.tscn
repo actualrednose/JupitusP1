@@ -1,0 +1,53 @@
+[gd_scene format=3 uid="uid://cvnj6hki542ny"]
+
+[ext_resource type="Script" uid="uid://cscaqj7hdtdk2" path="res://scripts/camera/stage_camera.gd" id="1_8kubq"]
+[ext_resource type="Texture2D" uid="uid://de6kri33m8e8d" path="res://icon.svg" id="2_2aats"]
+[ext_resource type="PackedScene" uid="uid://vgdqftmjjxgq" path="res://scenes/player.tscn" id="3_2aats"]
+[ext_resource type="Script" uid="uid://c4peqivqwm4pe" path="res://scripts/systems/scene_transition_trigger.gd" id="4_o4yw2"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o4yw2"]
+albedo_texture = ExtResource("2_2aats")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_o4yw2"]
+material = SubResource("StandardMaterial3D_o4yw2")
+size = Vector2(8, 8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ohil7"]
+size = Vector3(8, 0.1, 8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_01fuj"]
+
+[node name="TestsceneA" type="Node3D" unique_id=770474956]
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1999960969]
+script = ExtResource("1_8kubq")
+pitch_degrees = 15.0
+distance = 3.0
+follow_smoothing = 0.7
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1285436281]
+transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, 0, 3.2581081, 0)
+
+[node name="Floor" type="StaticBody3D" parent="." unique_id=676405230]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor" unique_id=984758045]
+mesh = SubResource("PlaneMesh_o4yw2")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=751089798]
+shape = SubResource("BoxShape3D_ohil7")
+
+[node name="Player" parent="Floor/CollisionShape3D" unique_id=1266291996 instance=ExtResource("3_2aats")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.80051726, 0)
+
+[node name="from_b" type="Marker3D" parent="." unique_id=1739728723 groups=["spawn_point"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.248, 0, -0.125)
+
+[node name="DoorToB" type="Area3D" parent="." unique_id=1563906309]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9936583, 0.4961103, -2.8509133)
+script = ExtResource("4_o4yw2")
+target_scene = "res://scenes/test scenes/testsceneB.tscn"
+target_spawn_point = "from_a"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DoorToB" unique_id=2112379377]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.52393174, -1.4957731)
+shape = SubResource("BoxShape3D_01fuj")

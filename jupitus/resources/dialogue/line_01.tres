@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="DialogueLine" format=3 uid="uid://c8y48h62s6jt"]
+
+[ext_resource type="Script" uid="uid://ddcy6t67u525" path="res://Scripts/dialogue/dialogue_choice.gd" id="1_tr0tj"]
+[ext_resource type="Script" uid="uid://bkmif1qkyfocw" path="res://Scripts/dialogue/dialogue_line.gd" id="2_ylea3"]
+[ext_resource type="Resource" uid="uid://ecc7o7rmiwyv" path="res://Resources/Dialogue/Char_TestShopkeeper.tres" id="3_ylea3"]
+
+[resource]
+script = ExtResource("2_ylea3")
+speaker = ExtResource("3_ylea3")
+text = "What's up dickhead?"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"

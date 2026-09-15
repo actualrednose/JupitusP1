@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://bw5s48jpqpsvm"]
+
+[ext_resource type="Script" uid="uid://cscaqj7hdtdk2" path="res://Scripts/Camera/stage_camera.gd" id="1_5ms4e"]
+[ext_resource type="PackedScene" uid="uid://vgdqftmjjxgq" path="res://Scenes/player.tscn" id="2_shgkq"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_01fuj"]
+size = Vector2(20, 20)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_01fuj"]
+size = Vector3(20, 0.1, 20)
+
+[sub_resource type="Environment" id="Environment_01fuj"]
+ambient_light_source = 2
+ambient_light_color = Color(0.6988822, 0.8256871, 0.985763, 1)
+ambient_light_energy = 0.5
+
+[node name="TestLevel" type="Node3D" unique_id=929049851]
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1667868207 node_paths=PackedStringArray("target")]
+script = ExtResource("1_5ms4e")
+target = NodePath("../Player")
+
+[node name="Player" parent="." unique_id=1266291996 instance=ExtResource("2_shgkq")]
+
+[node name="Floor" type="StaticBody3D" parent="." unique_id=1781268426]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor" unique_id=1790532517]
+mesh = SubResource("PlaneMesh_01fuj")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=339285596]
+shape = SubResource("BoxShape3D_01fuj")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1494535963]
+transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, 0, 3.2581081, 0)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1365486494]
+environment = SubResource("Environment_01fuj")

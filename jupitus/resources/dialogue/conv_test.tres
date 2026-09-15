@@ -1,0 +1,48 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3 uid="uid://tsxbesxt4c5b"]
+
+[ext_resource type="Script" uid="uid://bkmif1qkyfocw" path="res://scripts/dialogue/dialogue_line.gd" id="1_fv11v"]
+[ext_resource type="Script" uid="uid://bnic7bnq1fb5c" path="res://scripts/dialogue/dialogue_data.gd" id="1_vhjf6"]
+[ext_resource type="Resource" uid="uid://c8y48h62s6jt" path="res://resources/dialogue/line_01.tres" id="2_ajjmq"]
+[ext_resource type="Script" uid="uid://ddcy6t67u525" path="res://scripts/dialogue/dialogue_choice.gd" id="3_0t60u"]
+[ext_resource type="Resource" uid="uid://ecc7o7rmiwyv" path="res://resources/dialogue/Char_TestShopkeeper.tres" id="4_bn0kx"]
+[ext_resource type="Resource" uid="uid://l62brksua8dl" path="res://resources/dialogue/char_jamie.tres" id="4_tbq7g"]
+
+[sub_resource type="Resource" id="Resource_ymhe5"]
+script = ExtResource("1_fv11v")
+speaker = ExtResource("4_tbq7g")
+text = "Gonna buy some milk?"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_7k36y"]
+script = ExtResource("3_0t60u")
+text = "Yes"
+metadata/_custom_type_script = "uid://ddcy6t67u525"
+
+[sub_resource type="Resource" id="Resource_8wwdm"]
+script = ExtResource("3_0t60u")
+text = "No"
+metadata/_custom_type_script = "uid://ddcy6t67u525"
+
+[sub_resource type="Resource" id="Resource_iwr5v"]
+script = ExtResource("1_fv11v")
+speaker = ExtResource("4_bn0kx")
+text = "You want some?"
+choices = Array[ExtResource("3_0t60u")]([SubResource("Resource_7k36y"), SubResource("Resource_8wwdm")])
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_5mycs"]
+script = ExtResource("1_fv11v")
+speaker = ExtResource("4_bn0kx")
+text = "Awesome."
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_5ieal"]
+script = ExtResource("1_fv11v")
+speaker = ExtResource("4_bn0kx")
+text = "Then piss off!"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[resource]
+script = ExtResource("1_vhjf6")
+lines = Array[ExtResource("1_fv11v")]([ExtResource("2_ajjmq"), SubResource("Resource_ymhe5"), SubResource("Resource_iwr5v"), SubResource("Resource_5mycs"), SubResource("Resource_5ieal")])
+metadata/_custom_type_script = "uid://bnic7bnq1fb5c"

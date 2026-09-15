@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="DialogueCharacter" format=3 uid="uid://ecc7o7rmiwyv"]
+
+[ext_resource type="Texture2D" uid="uid://de6kri33m8e8d" path="res://icon.svg" id="1_5svp4"]
+[ext_resource type="Script" uid="uid://rh8ii72u8rxm" path="res://Scripts/dialogue/dialogue_character.gd" id="2_ydj53"]
+
+[resource]
+script = ExtResource("2_ydj53")
+display_name = "Shopkeeper"
+portrait = ExtResource("1_5svp4")
+metadata/_custom_type_script = "uid://rh8ii72u8rxm"

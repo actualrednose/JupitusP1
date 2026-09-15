@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="DialogueCharacter" format=3 uid="uid://cdcwhcbeiwm5e"]
+
+[ext_resource type="Texture2D" uid="uid://5bgofj48yvkv" path="res://Resources/TestChar Sprite/Idle.png" id="1_0db55"]
+[ext_resource type="Script" uid="uid://rh8ii72u8rxm" path="res://Scripts/dialogue/dialogue_character.gd" id="1_hptdc"]
+
+[resource]
+script = ExtResource("1_hptdc")
+display_name = "Alex"
+portrait = ExtResource("1_0db55")
+metadata/_custom_type_script = "uid://rh8ii72u8rxm"

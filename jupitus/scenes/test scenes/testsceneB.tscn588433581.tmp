@@ -1,0 +1,122 @@
+[gd_scene format=3 uid="uid://dujjjgbxlggi4"]
+
+[ext_resource type="Script" uid="uid://cscaqj7hdtdk2" path="res://scripts/camera/stage_camera.gd" id="1_354gk"]
+[ext_resource type="Texture2D" uid="uid://de6kri33m8e8d" path="res://icon.svg" id="2_i65kc"]
+[ext_resource type="PackedScene" uid="uid://vgdqftmjjxgq" path="res://scenes/player.tscn" id="3_8t61p"]
+[ext_resource type="Script" uid="uid://c4peqivqwm4pe" path="res://scripts/systems/scene_transition_trigger.gd" id="4_hhf1g"]
+[ext_resource type="Script" uid="uid://2he41lgut73t" path="res://scripts/actor/npc.gd" id="5_8t61p"]
+[ext_resource type="Resource" uid="uid://tsxbesxt4c5b" path="res://resources/dialogue/conv_test.tres" id="6_hhf1g"]
+[ext_resource type="Script" uid="uid://d1fculjemgye" path="res://scripts/cutscene/cutscene_player.gd" id="7_w73d5"]
+[ext_resource type="Script" uid="uid://e4nee2wiehds" path="res://scripts/cutscene/cutscene_action.gd" id="8_wucau"]
+[ext_resource type="Script" uid="uid://c8nbywjgw0vm5" path="res://scripts/cutscene/cutscene_action_camera.gd" id="9_ek8vy"]
+[ext_resource type="Script" uid="uid://brtvvo5sjpl7v" path="res://scripts/cutscene/cutscene_action_wait.gd" id="10_ybs2x"]
+[ext_resource type="Script" uid="uid://colgw8jbic88g" path="res://scripts/cutscene/cutscene_trigger.gd" id="11_wucau"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ujyaq"]
+albedo_texture = ExtResource("2_i65kc")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_bybcj"]
+material = SubResource("StandardMaterial3D_ujyaq")
+size = Vector2(8, 8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bijgb"]
+size = Vector3(8, 0.1, 8)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_8t61p"]
+radius = 1.0
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_hhf1g"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_i65kc")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_w73d5"]
+
+[sub_resource type="Resource" id="Resource_01fuj"]
+script = ExtResource("9_ek8vy")
+target = NodePath("../CameraTestMarker")
+wait_duration = 1.5
+
+[sub_resource type="Resource" id="Resource_3x8d0"]
+script = ExtResource("10_ybs2x")
+
+[sub_resource type="Resource" id="Resource_jjimy"]
+script = ExtResource("9_ek8vy")
+restore_to_player = true
+wait_duration = 1.5
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_01fuj"]
+
+[node name="TestsceneB" type="Node3D" unique_id=556206329]
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1160124854]
+script = ExtResource("1_354gk")
+pitch_degrees = 15.0
+distance = 3.0
+follow_smoothing = 0.7
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1889602164]
+transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, 0, 3.2581081, 0)
+
+[node name="Floor" type="StaticBody3D" parent="." unique_id=1553250079]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor" unique_id=1548595696]
+mesh = SubResource("PlaneMesh_bybcj")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=1021695889]
+shape = SubResource("BoxShape3D_bijgb")
+
+[node name="Player" parent="Floor/CollisionShape3D" unique_id=1266291996 instance=ExtResource("3_8t61p")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8102989, 0)
+
+[node name="from_a" type="Marker3D" parent="." unique_id=826850613 groups=["spawn_point"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.248, 0, -0.125)
+
+[node name="TestNPC" type="Area3D" parent="from_a" unique_id=1196191946]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 0)
+collision_layer = 2
+script = ExtResource("5_8t61p")
+npc_name = "Shopkeeper"
+first_dialogue = ExtResource("6_hhf1g")
+prompt_height = 2.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="from_a/TestNPC" unique_id=1922942811]
+shape = SubResource("SphereShape3D_8t61p")
+
+[node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="from_a/TestNPC" unique_id=488277312]
+billboard = 1
+sprite_frames = SubResource("SpriteFrames_hhf1g")
+animation = &"idle"
+
+[node name="DoorToA" type="Area3D" parent="." unique_id=777352734]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9936583, 0.45647272, -2.8509133)
+script = ExtResource("4_hhf1g")
+target_scene = "res://scenes/test scenes/testsceneA.tscn"
+target_spawn_point = "from_b"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DoorToA" unique_id=1903309603]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.52393174, -1.4957731)
+shape = SubResource("BoxShape3D_w73d5")
+
+[node name="CameraTestMarker" type="Marker3D" parent="." unique_id=708086019]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7881063, 0, 0.27783298)
+
+[node name="TestCutscenePlayer" type="Node" parent="." unique_id=1538805589]
+script = ExtResource("7_w73d5")
+actions = Array[ExtResource("8_wucau")]([SubResource("Resource_01fuj"), SubResource("Resource_3x8d0"), SubResource("Resource_jjimy")])
+
+[node name="CutsceneTrigger" type="Area3D" parent="." unique_id=1584687088 node_paths=PackedStringArray("cutscene_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.7367003, 0, 3.7081215)
+collision_layer = 2
+script = ExtResource("11_wucau")
+cutscene_player = NodePath("../TestCutscenePlayer")
+trigger_mode = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CutsceneTrigger" unique_id=219737048]
+shape = SubResource("BoxShape3D_01fuj")

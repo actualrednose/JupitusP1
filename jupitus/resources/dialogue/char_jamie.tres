@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="DialogueCharacter" format=3 uid="uid://l62brksua8dl"]
+
+[ext_resource type="Texture2D" uid="uid://ctcg5koofn03n" path="res://resources/TestChar Sprite/Walk2.png" id="1_d4fir"]
+[ext_resource type="Script" uid="uid://rh8ii72u8rxm" path="res://scripts/dialogue/dialogue_character.gd" id="1_krv3x"]
+
+[resource]
+script = ExtResource("1_krv3x")
+display_name = "jamie"
+is_party_member = true
+portrait = ExtResource("1_d4fir")
+metadata/_custom_type_script = "uid://rh8ii72u8rxm"
