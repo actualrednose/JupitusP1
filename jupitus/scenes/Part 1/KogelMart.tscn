@@ -7,16 +7,23 @@
 [ext_resource type="Texture2D" uid="uid://gmnskd4xqopv" path="res://resources/sprites/environmental/kogelmart/Fridges.png" id="4_5o2a2"]
 [ext_resource type="Texture2D" uid="uid://b3asc3kph64w" path="res://resources/sprites/environmental/kogelmart/Shelve big.png" id="4_xmejl"]
 [ext_resource type="Texture2D" uid="uid://xrxug6k6ny1p" path="res://resources/sprites/environmental/kogelmart/ShelveSmall.png" id="5_28ksu"]
+[ext_resource type="Texture2D" uid="uid://bo7y5n5wpx1ij" path="res://resources/sprites/NPCs/KogelBotCashier.png" id="8_7dxde"]
 [ext_resource type="Script" uid="uid://d3a83b7v6ytes" path="res://scripts/actor/milk_interactable.gd" id="8_22vjl"]
+[ext_resource type="Script" uid="uid://2he41lgut73t" path="res://scripts/actor/npc.gd" id="8_x36dm"]
 [ext_resource type="Resource" uid="uid://qnyta8131g65" path="res://resources/dialogue/kogelmart/milk_during_robbery.tres" id="9_gigyx"]
+[ext_resource type="Texture2D" uid="uid://cfd45865yhvyy" path="res://resources/sprites/environmental/kogelmart/MachineCultist.png" id="9_h7tew"]
+[ext_resource type="Resource" uid="uid://dx56x43eq0bsn" path="res://resources/dialogue/kogelmart/cultist_confrontation.tres" id="9_vl3xx"]
 [ext_resource type="Script" uid="uid://d1fculjemgye" path="res://scripts/cutscene/cutscene_player.gd" id="10_ng2d6"]
 [ext_resource type="Script" uid="uid://e4nee2wiehds" path="res://scripts/cutscene/cutscene_action.gd" id="11_v2hqh"]
 [ext_resource type="Script" uid="uid://bkmif1qkyfocw" path="res://scripts/dialogue/dialogue_line.gd" id="12_4xk5b"]
 [ext_resource type="Script" uid="uid://ddcy6t67u525" path="res://scripts/dialogue/dialogue_choice.gd" id="13_7dxde"]
 [ext_resource type="Script" uid="uid://bnic7bnq1fb5c" path="res://scripts/dialogue/dialogue_data.gd" id="14_ykydi"]
 [ext_resource type="Script" uid="uid://deq5ipwsf8rv7" path="res://scripts/cutscene/cutscene_action_dialogue.gd" id="15_x36dm"]
+[ext_resource type="Script" uid="uid://c8nbywjgw0vm5" path="res://scripts/cutscene/cutscene_action_camera.gd" id="16_4xk5b"]
 [ext_resource type="Script" uid="uid://dawlns8gfr3sk" path="res://scripts/cutscene/cutscene_action_set_flag.gd" id="16_h7tew"]
 [ext_resource type="Script" uid="uid://colgw8jbic88g" path="res://scripts/cutscene/cutscene_trigger.gd" id="17_v2hqh"]
+[ext_resource type="Resource" uid="uid://c6h3kp852qy08" path="res://resources/dialogue/characters/MachineCultist.tres" id="18_ups6i"]
+[ext_resource type="Resource" uid="uid://dg5kpnhdu8s77" path="res://resources/dialogue/characters/KogelBot.tres" id="19_vl3xx"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8xg12"]
 albedo_color = Color(0.16206557, 0.1620656, 0.16206557, 1)
@@ -89,6 +96,12 @@ size = Vector3(11.34, 3.39, 0.105)
 [sub_resource type="BoxMesh" id="BoxMesh_aen8j"]
 size = Vector3(10.999756, 0.17773438, 5.010254)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_xufgy"]
+size = Vector3(1.8288574, 1, 2.1792603)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ykydi"]
+size = Vector3(1.1599121, 0.48620605, 0.6713257)
+
 [sub_resource type="BoxMesh" id="BoxMesh_tbuv2"]
 size = Vector3(2.0390015, 0.55078125, 0.48242188)
 
@@ -101,14 +114,37 @@ size = Vector3(2.1209717, 1, 1.512207)
 [sub_resource type="BoxShape3D" id="BoxShape3D_73cvo"]
 size = Vector3(0.7821045, 0.722229, 1.1306839)
 
+[sub_resource type="Resource" id="Resource_v2hqh"]
+script = ExtResource("16_4xk5b")
+target = NodePath("CounterPoint")
+ease_type = 0
+metadata/_custom_type_script = "uid://c8nbywjgw0vm5"
+
 [sub_resource type="Resource" id="Resource_jjimy"]
 script = ExtResource("12_4xk5b")
-text = "Robbery in Progress."
+speaker = ExtResource("18_ups6i")
+text = "Come on pal, open up. I just want a peek!"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_msw3j"]
+script = ExtResource("12_4xk5b")
+speaker = ExtResource("19_vl3xx")
+text = "[PLEASE REFRAIN]
+[AUTHORITIES  CONTACTED.]
+[ARRIVAL DUE IN...]"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_wx5q2"]
+script = ExtResource("12_4xk5b")
+speaker = ExtResource("19_vl3xx")
+text = "[4 HOURS]
+
+[OH NO]"
 metadata/_custom_type_script = "uid://bkmif1qkyfocw"
 
 [sub_resource type="Resource" id="Resource_3x8d0"]
 script = ExtResource("14_ykydi")
-lines = Array[ExtResource("12_4xk5b")]([SubResource("Resource_jjimy")])
+lines = Array[ExtResource("12_4xk5b")]([SubResource("Resource_jjimy"), SubResource("Resource_msw3j"), SubResource("Resource_wx5q2")])
 metadata/_custom_type_script = "uid://bnic7bnq1fb5c"
 
 [sub_resource type="Resource" id="Resource_01fuj"]
@@ -121,6 +157,12 @@ script = ExtResource("16_h7tew")
 flag_name = "robbery_in_progress"
 metadata/_custom_type_script = "uid://dawlns8gfr3sk"
 
+[sub_resource type="Resource" id="Resource_4xk5b"]
+script = ExtResource("16_4xk5b")
+restore_to_player = true
+ease_type = 0
+metadata/_custom_type_script = "uid://c8nbywjgw0vm5"
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_1eb1t"]
 
 [node name="KogelMart" type="Node3D" unique_id=1560995785]
@@ -129,7 +171,7 @@ metadata/_custom_type_script = "uid://dawlns8gfr3sk"
 script = ExtResource("1_rm8ds")
 pitch_degrees = 15.0
 distance = 3.0
-follow_smoothing = 0.7
+follow_smoothing = 1.0
 
 [node name="Floor" type="StaticBody3D" parent="." unique_id=785142314]
 
@@ -256,7 +298,6 @@ shaded = true
 texture = ExtResource("5_28ksu")
 
 [node name="Walls" type="Node3D" parent="." unique_id=1737348445]
-visible = false
 
 [node name="NorthWindow" type="Sprite3D" parent="Walls" unique_id=754119455]
 transform = Transform3D(1.01, 0, 0, 0, 1.01, 0, 0, 0, 1.01, -0.02459925, 1.3822159, -2.569)
@@ -324,7 +365,35 @@ mesh = SubResource("BoxMesh_01fuj")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.3446088, -0.021728516)
 mesh = SubResource("BoxMesh_aen8j")
 
+[node name="MachineCultist" type="Area3D" parent="." unique_id=1167547128]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.52129, 0.58930933, -1.9803706)
+script = ExtResource("8_x36dm")
+npc_name = "MachineCultist"
+first_dialogue = ExtResource("9_vl3xx")
+prompt_text = "Press E (?)"
+
+[node name="Sprite3D" type="Sprite3D" parent="MachineCultist" unique_id=1037577489]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04374802, 1.234856)
+texture = ExtResource("9_h7tew")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MachineCultist" unique_id=389556764]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4144287, -0.60963774, 0.7183279)
+shape = SubResource("BoxShape3D_xufgy")
+
+[node name="KogelBotClerk" type="Area3D" parent="." unique_id=2085646925]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.52129, 0.58930933, -1.9803706)
+
+[node name="Sprite3D" type="Sprite3D" parent="KogelBotClerk" unique_id=19749913]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.22888494)
+billboard = 1
+texture = ExtResource("8_7dxde")
+
+[node name="DialogueCollision" type="CollisionShape3D" parent="KogelBotClerk" unique_id=2059416067]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.079956055, -0.35345674, 1.0488046)
+shape = SubResource("BoxShape3D_ykydi")
+
 [node name="Store Counter" type="Node3D" parent="." unique_id=87145978]
+transform = Transform3D(1, 0, 0, 0, 0.7435758, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Store Counter" unique_id=1304431966]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.49112, 0.22460938, -1.3611614)
@@ -351,7 +420,10 @@ shape = SubResource("BoxShape3D_73cvo")
 
 [node name="RobberyCutscene" type="Node" parent="." unique_id=1211326049]
 script = ExtResource("10_ng2d6")
-actions = Array[ExtResource("11_v2hqh")]([SubResource("Resource_01fuj"), SubResource("Resource_aen8j")])
+actions = Array[ExtResource("11_v2hqh")]([SubResource("Resource_v2hqh"), SubResource("Resource_01fuj"), SubResource("Resource_aen8j"), SubResource("Resource_4xk5b")])
+
+[node name="CounterPoint" type="Marker3D" parent="RobberyCutscene" unique_id=1430614996]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2637844, 0.7736827, -2.0180006)
 
 [node name="Area3D" type="Area3D" parent="RobberyCutscene" unique_id=1205303202 node_paths=PackedStringArray("cutscene_player")]
 collision_layer = 2

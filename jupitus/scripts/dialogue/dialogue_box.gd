@@ -278,35 +278,38 @@ func _unhandled_input(event: InputEvent) -> void:
 # Public API (called by DialogueManager)
 # -----------------------------------------------------------------------------
 
-## Start showing a new conversation. Tweens the box in, then plays the first line.
 func start_dialogue(data: DialogueData) -> void:
-		_data = data
-		_current_line_index = 0
-		_active = true
-		_showing_choices = false
+	_data = data
+	_current_line_index = 0
+	_current_line = null
+	_active = true
+	_showing_choices = false
 
-		# Reset multi-portrait state for the new conversation
-		_character_slots.clear()
-		_current_speaker = null
-		for slot in _portrait_slots.values():
-				if slot:
-						slot.visible = false
-						slot.texture = null
+	# Clear content from the previous conversation before showing the box.
+	_text_label.text = ""
+	_text_label.visible_characters = 0
+	_name_label.text = ""
+	_name_plate.visible = false
+	_continue_prompt.visible = false
+	_hide_choices()
 
-		# Show the box (tween alpha from 0 to 1)
-		_show_box(true)
-		_show_dimmer(true)
+	# Reset multi-portrait state for the new conversation.
+	_character_slots.clear()
+	_current_speaker = null
 
-		# Wait for the box tween to finish before starting the first line,
-		# so the typewriter doesn't start while the box is still sliding in.
-		#
-		# `await` pauses this function until the signal fires. We create a
-		# one-shot timer since we don't have direct access to the tween's
-		# finished signal here (tween kills/restarts would complicate things).
-		await get_tree().create_timer(box_tween_duration).timeout
+	for slot in _portrait_slots.values():
+		if slot:
+			slot.visible = false
+			slot.texture = null
 
-		_play_current_line()
+	# Show the box and dimmer.
+	_show_box(true)
+	_show_dimmer(true)
 
+	# Wait for the box animation before starting the first line.
+	await get_tree().create_timer(box_tween_duration).timeout
+
+	_play_current_line()
 
 ## End the conversation. Tweens the box out and emits conversation_ended.
 func end_dialogue() -> void:

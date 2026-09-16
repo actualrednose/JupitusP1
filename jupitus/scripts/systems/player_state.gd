@@ -107,8 +107,24 @@ func get_flag(flag_name: String, default: Variant = null) -> Variant:
 ## Returns true if the flag exists and is "truthy" (not false, not null, not 0).
 ## Convenient for `if PlayerState.has_flag("met_robber"):` checks.
 func has_flag(flag_name: String) -> bool:
+	if not flags.has(flag_name):
+		return false
+
 	var value: Variant = flags.get(flag_name, null)
-	return value != null and value != false and value != 0
+
+	match typeof(value):
+		TYPE_NIL:
+			return false
+		TYPE_BOOL:
+			return bool(value)
+		TYPE_INT:
+			return int(value) != 0
+		TYPE_FLOAT:
+			return not is_zero_approx(float(value))
+		TYPE_STRING, TYPE_STRING_NAME:
+			return not str(value).is_empty()
+		_:
+			return true
 
 
 ## Remove a flag entirely (as if it was never set).

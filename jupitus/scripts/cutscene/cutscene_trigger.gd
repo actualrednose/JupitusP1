@@ -87,6 +87,10 @@ func _ready() -> void:
 # -----------------------------------------------------------------------------
 
 func _on_body_entered(body: Node) -> void:
+	# One-shot triggers remain disabled after their first activation.
+	if not enabled:
+		return
+
 	super._on_body_entered(body)
 
 	if not body.is_in_group(&"player"):
@@ -110,36 +114,37 @@ func _on_interacted(_p: Node) -> void:
 # -----------------------------------------------------------------------------
 
 func _trigger_cutscene() -> void:
+	if not enabled:
+		return
+
 	# Bail out if no cutscene player is assigned.
 	if cutscene_player == null:
 		push_warning(
-			"CutsceneTrigger '%s': no cutscene_player assigned. " % name \
+			"CutsceneTrigger '%s': no cutscene_player assigned. " % name
 			+ "Drag a CutscenePlayer node into the slot in the Inspector."
 		)
 		return
 
-	# Bail out if the cutscene is already playing (e.g., player walked
-	# back into the trigger zone mid-cutscene — shouldn't happen, but defensive).
+	# Bail out if the cutscene is already playing.
 	if cutscene_player.is_playing():
 		push_warning("CutsceneTrigger '%s': cutscene is already playing" % name)
 		return
 
-	# Disable this trigger immediately so the player can't trigger it twice.
-	# (For one_shot triggers, this is permanent. For non-one-shot, we'll
-	# re-enable after the cutscene ends.)
 	enabled = false
-
-	# Start the cutscene.
 	cutscene_player.play()
 
-	# For non-one-shot triggers, re-enable after the cutscene finishes.
 	if not one_shot:
 		if not cutscene_player.cutscene_finished.is_connected(_on_cutscene_finished):
-			cutscene_player.cutscene_finished.connect(_on_cutscene_finished, CONNECT_ONE_SHOT)
-		# Also re-enable if the cutscene was skipped
-		if not cutscene_player.cutscene_skipped.is_connected(_on_cutscene_finished):
-			cutscene_player.cutscene_skipped.connect(_on_cutscene_finished, CONNECT_ONE_SHOT)
+			cutscene_player.cutscene_finished.connect(
+				_on_cutscene_finished,
+				CONNECT_ONE_SHOT
+			)
 
+		if not cutscene_player.cutscene_skipped.is_connected(_on_cutscene_finished):
+			cutscene_player.cutscene_skipped.connect(
+				_on_cutscene_finished,
+				CONNECT_ONE_SHOT
+			)
 
 func _on_cutscene_finished() -> void:
 	# Re-enable the trigger so it can fire again.

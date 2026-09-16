@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="DialogueCharacter" format=3 uid="uid://c6h3kp852qy08"]
+
+[ext_resource type="Script" uid="uid://rh8ii72u8rxm" path="res://scripts/dialogue/dialogue_character.gd" id="1_1seol"]
+[ext_resource type="Texture2D" uid="uid://de6kri33m8e8d" path="res://icon.svg" id="1_chhl2"]
+
+[resource]
+script = ExtResource("1_1seol")
+display_name = "Crazed Man"
+portrait = ExtResource("1_chhl2")
+metadata/_custom_type_script = "uid://rh8ii72u8rxm"

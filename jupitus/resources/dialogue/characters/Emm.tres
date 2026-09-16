@@ -1,9 +1,11 @@
 [gd_resource type="Resource" script_class="DialogueCharacter" format=3 uid="uid://byv0nuncpcc22"]
 
 [ext_resource type="Script" uid="uid://rh8ii72u8rxm" path="res://scripts/dialogue/dialogue_character.gd" id="1_e7oy0"]
+[ext_resource type="Texture2D" uid="uid://de6kri33m8e8d" path="res://icon.svg" id="1_i1rx4"]
 
 [resource]
 script = ExtResource("1_e7oy0")
 display_name = "Emm"
 is_party_member = true
+portrait = ExtResource("1_i1rx4")
 metadata/_custom_type_script = "uid://rh8ii72u8rxm"
