@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="AbilityDefinition" format=3 uid="uid://glo0wek0lkc7"]
+
+[ext_resource type="Script" uid="uid://c6203othnxyij" path="res://scripts/combat/ability_definition.gd" id="1_jv41o"]
+
+[resource]
+script = ExtResource("1_jv41o")
+display_name = "Stab"
+kind = 0
+metadata/_custom_type_script = "uid://c6203othnxyij"

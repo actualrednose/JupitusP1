@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CombatantDefinition" format=3 uid="uid://c5die8ec45dm"]
+
+[ext_resource type="Script" uid="uid://1d82jwvuc7el" path="res://scripts/combat/combatant_definition.gd" id="1_lmlmw"]
+[ext_resource type="Resource" uid="uid://dmdwov5faitb3" path="res://resources/combat/mainparty/Guard.tres" id="1_wl8b6"]
+[ext_resource type="Texture2D" uid="uid://de6kri33m8e8d" path="res://icon.svg" id="2_j3nh6"]
+[ext_resource type="Script" uid="uid://c6203othnxyij" path="res://scripts/combat/ability_definition.gd" id="2_mwcq5"]
+[ext_resource type="Resource" uid="uid://bnofmt6ujykyk" path="res://resources/combat/mainparty/Emm/EmmMainAttack.tres" id="3_573k3"]
+
+[resource]
+script = ExtResource("1_lmlmw")
+combatant_id = &"emm"
+display_name = "Emm"
+icon = ExtResource("2_j3nh6")
+main_attack = ExtResource("3_573k3")
+guard_ability = ExtResource("1_wl8b6")
+metadata/_custom_type_script = "uid://1d82jwvuc7el"

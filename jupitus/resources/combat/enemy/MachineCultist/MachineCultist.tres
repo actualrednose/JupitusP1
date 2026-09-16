@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CombatantDefinition" format=3 uid="uid://dewsorv62rs2v"]
+
+[ext_resource type="Script" uid="uid://1d82jwvuc7el" path="res://scripts/combat/combatant_definition.gd" id="1_jsolp"]
+[ext_resource type="Texture2D" uid="uid://de6kri33m8e8d" path="res://icon.svg" id="1_wuwfo"]
+[ext_resource type="Script" uid="uid://c6203othnxyij" path="res://scripts/combat/ability_definition.gd" id="2_qwliv"]
+[ext_resource type="Resource" uid="uid://bixjblpv18ep" path="res://resources/combat/enemy/MachineCultist/CultistPowerSlash.tres" id="4_tajll"]
+
+[resource]
+script = ExtResource("1_jsolp")
+combatant_id = &"cultist"
+display_name = "Strange Man"
+icon = ExtResource("1_wuwfo")
+power_attack = ExtResource("4_tajll")
+metadata/_custom_type_script = "uid://1d82jwvuc7el"

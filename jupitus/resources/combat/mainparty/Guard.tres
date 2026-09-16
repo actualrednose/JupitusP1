@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="AbilityDefinition" format=3 uid="uid://dmdwov5faitb3"]
+
+[ext_resource type="Script" uid="uid://c6203othnxyij" path="res://scripts/combat/ability_definition.gd" id="1_sox3o"]
+
+[resource]
+script = ExtResource("1_sox3o")
+display_name = "Guard"
+kind = 2
+action_priority = 100
+metadata/_custom_type_script = "uid://c6203othnxyij"
