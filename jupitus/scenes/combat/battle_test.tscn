@@ -1,0 +1,75 @@
+[gd_scene format=3 uid="uid://ddhos5d60nke6"]
+
+[ext_resource type="PackedScene" uid="uid://3nclj0ld5ntj" path="res://scenes/combat/battle_hud.tscn" id="1_1yf7f"]
+[ext_resource type="Script" uid="uid://c0mdjukebrc5f" path="res://scripts/combat/battle_controller.gd" id="2_c6bvs"]
+[ext_resource type="Script" uid="uid://1d82jwvuc7el" path="res://scripts/combat/combatant_definition.gd" id="2_furec"]
+[ext_resource type="Texture2D" uid="uid://ca7xi72nemui2" path="res://resources/combat/enemy/MachineCultist/joeBadguy.png" id="2_jlq6r"]
+[ext_resource type="Resource" uid="uid://c5die8ec45dm" path="res://resources/combat/mainparty/Emm/EmmCombatant.tres" id="3_jn58a"]
+[ext_resource type="Resource" uid="uid://dewsorv62rs2v" path="res://resources/combat/enemy/MachineCultist/MachineCultist.tres" id="4_jn58a"]
+[ext_resource type="Script" uid="uid://bsrkjtj3xyj08" path="res://scripts/combat/battle_enemy_actor.gd" id="6_bwj6y"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_01fuj"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_jlq6r")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_01fuj"]
+size = Vector2(179, 300)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_jlq6r"]
+load_path = "res://.godot/imported/Placeholderskull.png-c40f16fc8ba5c0410b3b61eaaa0c1426.s3tc.ctex"
+
+[node name="BattleTest" type="Control" unique_id=475334041]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="." unique_id=546004038]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.19793725, 0.19793722, 0.19793722, 1)
+
+[node name="EnemyActors" type="Node2D" parent="." unique_id=2064654167]
+
+[node name="CultistActor" type="Node2D" parent="EnemyActors" unique_id=1960933389]
+position = Vector2(566, 292)
+script = ExtResource("6_bwj6y")
+
+[node name="Visual" type="Node2D" parent="EnemyActors/CultistActor" unique_id=1738786865]
+
+[node name="AnimatedSprite3D" type="AnimatedSprite2D" parent="EnemyActors/CultistActor/Visual" unique_id=1642558682]
+sprite_frames = SubResource("SpriteFrames_01fuj")
+
+[node name="TargetArea" type="Area2D" parent="EnemyActors/CultistActor" unique_id=500788714]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyActors/CultistActor/TargetArea" unique_id=635331164]
+position = Vector2(12.5, 5)
+shape = SubResource("RectangleShape2D_01fuj")
+
+[node name="PowerAttackIndicator" type="Sprite2D" parent="EnemyActors/CultistActor" unique_id=272745106]
+position = Vector2(0, -201)
+scale = Vector2(0.5, 0.5)
+texture = SubResource("CompressedTexture2D_jlq6r")
+
+[node name="BattleController" type="Node" parent="." unique_id=1347460764 node_paths=PackedStringArray("enemy_actors")]
+script = ExtResource("2_c6bvs")
+player_definitions = Array[ExtResource("2_furec")]([ExtResource("3_jn58a")])
+enemy_definitions = Array[ExtResource("2_furec")]([ExtResource("4_jn58a")])
+enemy_actors = [NodePath("../EnemyActors/CultistActor")]
+
+[node name="BattleHUD" parent="." unique_id=601674235 node_paths=PackedStringArray("battle_controller") instance=ExtResource("1_1yf7f")]
+battle_controller = NodePath("../BattleController")

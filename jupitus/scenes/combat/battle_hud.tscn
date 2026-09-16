@@ -1,0 +1,68 @@
+[gd_scene format=3 uid="uid://3nclj0ld5ntj"]
+
+[ext_resource type="Script" uid="uid://benvifcw2cjcs" path="res://scenes/combat/battle_hud.gd" id="1_1yru0"]
+
+[node name="BattleHUD" type="CanvasLayer" unique_id=601674235]
+script = ExtResource("1_1yru0")
+
+[node name="Root" type="Control" parent="." unique_id=613907138]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ScreenMargin" type="MarginContainer" parent="Root" unique_id=1511916772]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="Layout" type="VBoxContainer" parent="Root/ScreenMargin" unique_id=938569602]
+layout_mode = 2
+
+[node name="EnemyStageSpacer" type="Control" parent="Root/ScreenMargin/Layout" unique_id=1335271035]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="TargetPrompt" type="Label" parent="Root/ScreenMargin/Layout" unique_id=926234723]
+layout_mode = 2
+text = "Click Attack, then click an enemy"
+
+[node name="PartyList" type="HBoxContainer" parent="Root/ScreenMargin/Layout" unique_id=1243259024]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_constants/separation = 48
+alignment = 1
+
+[node name="CommandBar" type="HBoxContainer" parent="Root/ScreenMargin/Layout" unique_id=109221850]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="AttackButton" type="Button" parent="Root/ScreenMargin/Layout/CommandBar" unique_id=725424119]
+custom_minimum_size = Vector2(140, 48)
+layout_mode = 2
+text = "Attack"
+
+[node name="GuardButton" type="Button" parent="Root/ScreenMargin/Layout/CommandBar" unique_id=15512121]
+custom_minimum_size = Vector2(140, 48)
+layout_mode = 2
+text = "Guard"
+
+[node name="ConfirmButton" type="Button" parent="Root/ScreenMargin/Layout/CommandBar" unique_id=2122632084]
+custom_minimum_size = Vector2(140, 48)
+layout_mode = 2
+text = "Confirm"
+
+[node name="StatusLabel" type="Label" parent="Root/ScreenMargin/Layout" unique_id=647116229]
+layout_mode = 2
