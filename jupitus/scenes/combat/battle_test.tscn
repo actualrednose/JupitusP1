@@ -7,6 +7,7 @@
 [ext_resource type="Resource" uid="uid://c5die8ec45dm" path="res://resources/combat/mainparty/Emm/EmmCombatant.tres" id="3_jn58a"]
 [ext_resource type="Resource" uid="uid://dewsorv62rs2v" path="res://resources/combat/enemy/MachineCultist/MachineCultist.tres" id="4_jn58a"]
 [ext_resource type="Script" uid="uid://bsrkjtj3xyj08" path="res://scripts/combat/battle_enemy_actor.gd" id="6_bwj6y"]
+[ext_resource type="Resource" uid="uid://cgfsi4nf7tevr" path="res://resources/combat/mainparty/Roommate/RoommateCombatant.tres" id="6_qt72d"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_01fuj"]
 animations = [{
@@ -32,6 +33,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="Background" type="ColorRect" parent="." unique_id=546004038]
 layout_mode = 1
@@ -58,6 +60,7 @@ sprite_frames = SubResource("SpriteFrames_01fuj")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyActors/CultistActor/TargetArea" unique_id=635331164]
 position = Vector2(12.5, 5)
+scale = Vector2(1.1199988, 1)
 shape = SubResource("RectangleShape2D_01fuj")
 
 [node name="PowerAttackIndicator" type="Sprite2D" parent="EnemyActors/CultistActor" unique_id=272745106]
@@ -67,7 +70,7 @@ texture = SubResource("CompressedTexture2D_jlq6r")
 
 [node name="BattleController" type="Node" parent="." unique_id=1347460764 node_paths=PackedStringArray("enemy_actors")]
 script = ExtResource("2_c6bvs")
-player_definitions = Array[ExtResource("2_furec")]([ExtResource("3_jn58a")])
+player_definitions = Array[ExtResource("2_furec")]([ExtResource("3_jn58a"), ExtResource("6_qt72d")])
 enemy_definitions = Array[ExtResource("2_furec")]([ExtResource("4_jn58a")])
 enemy_actors = [NodePath("../EnemyActors/CultistActor")]
 
