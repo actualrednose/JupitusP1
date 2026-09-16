@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://de6kri33m8e8d" path="res://icon.svg" id="2_j3nh6"]
 [ext_resource type="Script" uid="uid://c6203othnxyij" path="res://scripts/combat/ability_definition.gd" id="2_mwcq5"]
 [ext_resource type="Resource" uid="uid://bnofmt6ujykyk" path="res://resources/combat/mainparty/Emm/EmmMainAttack.tres" id="3_573k3"]
+[ext_resource type="Resource" uid="uid://bokapwg04v2og" path="res://resources/combat/mainparty/Emm/SecondWind.tres" id="6_j3nh6"]
 
 [resource]
 script = ExtResource("1_lmlmw")
@@ -12,5 +13,6 @@ combatant_id = &"emm"
 display_name = "Emm"
 icon = ExtResource("2_j3nh6")
 main_attack = ExtResource("3_573k3")
+skills = Array[ExtResource("2_mwcq5")]([ExtResource("6_j3nh6")])
 guard_ability = ExtResource("1_wl8b6")
 metadata/_custom_type_script = "uid://1d82jwvuc7el"

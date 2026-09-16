@@ -6,6 +6,8 @@
 script = ExtResource("1_oygk6")
 display_name = "Shoot"
 kind = 0
+tempo_gain_on_use_min = 5
+tempo_gain_on_use_max = 10
 action_priority = 10
 timing_type = 1
 disrupts_power_attack_on_perfect = true

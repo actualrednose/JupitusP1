@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="AbilityDefinition" format=3 uid="uid://bokapwg04v2og"]
+
+[ext_resource type="Script" uid="uid://c6203othnxyij" path="res://scripts/combat/ability_definition.gd" id="1_rq6ps"]
+
+[resource]
+script = ExtResource("1_rq6ps")
+display_name = "Second Wind"
+tempo_cost = 40
+action_priority = 10
+action_verb = "used"
+effect_type = 1
+effect_value_min = 40
+effect_value_max = 60
+metadata/_custom_type_script = "uid://c6203othnxyij"

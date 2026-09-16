@@ -6,4 +6,6 @@
 script = ExtResource("1_jv41o")
 display_name = "Stab"
 kind = 0
+effect_value_min = 1
+effect_value_max = 30
 metadata/_custom_type_script = "uid://c6203othnxyij"

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CombatantDefinition" format=3 uid="uid://cgfsi4nf7tevr"]
+
+[ext_resource type="Resource" uid="uid://dmdwov5faitb3" path="res://resources/combat/mainparty/Guard.tres" id="1_2j1cu"]
+[ext_resource type="Script" uid="uid://1d82jwvuc7el" path="res://scripts/combat/combatant_definition.gd" id="1_rs3e3"]
+[ext_resource type="Texture2D" uid="uid://de6kri33m8e8d" path="res://icon.svg" id="2_06rbf"]
+[ext_resource type="Script" uid="uid://c6203othnxyij" path="res://scripts/combat/ability_definition.gd" id="2_jo85w"]
+[ext_resource type="Resource" uid="uid://bnofmt6ujykyk" path="res://resources/combat/mainparty/Emm/EmmMainAttack.tres" id="3_id7sn"]
+
+[resource]
+script = ExtResource("1_rs3e3")
+combatant_id = &"roommate"
+display_name = "The Roommate"
+icon = ExtResource("2_06rbf")
+max_hp = 120
+speed = 5
+main_attack = ExtResource("3_id7sn")
+guard_ability = ExtResource("1_2j1cu")
+metadata/_custom_type_script = "uid://1d82jwvuc7el"
