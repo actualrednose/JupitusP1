@@ -8,6 +8,8 @@
 [ext_resource type="Resource" uid="uid://dewsorv62rs2v" path="res://resources/combat/enemy/MachineCultist/MachineCultist.tres" id="4_jn58a"]
 [ext_resource type="Script" uid="uid://bsrkjtj3xyj08" path="res://scripts/combat/battle_enemy_actor.gd" id="6_bwj6y"]
 [ext_resource type="Resource" uid="uid://cgfsi4nf7tevr" path="res://resources/combat/mainparty/Roommate/RoommateCombatant.tres" id="6_qt72d"]
+[ext_resource type="Texture2D" uid="uid://chy84x4w3uaj2" path="res://resources/sprites/combat/Crosshair.png" id="9_65oax"]
+[ext_resource type="Script" uid="uid://c8ep73f7gl8kf" path="res://scripts/combat/battle_presentation_director.gd" id="9_inti1"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_01fuj"]
 animations = [{
@@ -51,6 +53,9 @@ color = Color(0.19793725, 0.19793722, 0.19793722, 1)
 position = Vector2(566, 292)
 script = ExtResource("6_bwj6y")
 
+[node name="HeadTarget" type="Marker2D" parent="EnemyActors/CultistActor" unique_id=1187548362]
+position = Vector2(-4, -110)
+
 [node name="Visual" type="Node2D" parent="EnemyActors/CultistActor" unique_id=1738786865]
 
 [node name="AnimatedSprite3D" type="AnimatedSprite2D" parent="EnemyActors/CultistActor/Visual" unique_id=1642558682]
@@ -76,3 +81,10 @@ enemy_actors = [NodePath("../EnemyActors/CultistActor")]
 
 [node name="BattleHUD" parent="." unique_id=601674235 node_paths=PackedStringArray("battle_controller") instance=ExtResource("1_1yf7f")]
 battle_controller = NodePath("../BattleController")
+emm_crosshair_texture = ExtResource("9_65oax")
+emm_crosshair_speed = 700.0
+emm_killshot_radius = 15.0
+emm_clean_shot_radius = 27.0
+
+[node name="BattlePresentationDirector" type="Node" parent="." unique_id=1475103282]
+script = ExtResource("9_inti1")
