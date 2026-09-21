@@ -8,6 +8,7 @@
 [ext_resource type="Resource" uid="uid://dewsorv62rs2v" path="res://resources/combat/enemy/MachineCultist/MachineCultist.tres" id="4_jn58a"]
 [ext_resource type="Script" uid="uid://bsrkjtj3xyj08" path="res://scripts/combat/battle_enemy_actor.gd" id="6_bwj6y"]
 [ext_resource type="Resource" uid="uid://cgfsi4nf7tevr" path="res://resources/combat/mainparty/Roommate/RoommateCombatant.tres" id="6_qt72d"]
+[ext_resource type="Script" path="res://scripts/combat/battle_presentation_director.gd" id="7_present"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_01fuj"]
 animations = [{
@@ -47,14 +48,18 @@ color = Color(0.19793725, 0.19793722, 0.19793722, 1)
 
 [node name="EnemyActors" type="Node2D" parent="." unique_id=2064654167]
 
-[node name="CultistActor" type="Node2D" parent="EnemyActors" unique_id=1960933389]
+[node name="CultistActor" type="Node2D" parent="EnemyActors" unique_id=1960933389 node_paths=PackedStringArray("timing_target")]
 position = Vector2(566, 292)
 script = ExtResource("6_bwj6y")
+timing_target = NodePath("HeadTarget")
 
 [node name="Visual" type="Node2D" parent="EnemyActors/CultistActor" unique_id=1738786865]
 
 [node name="AnimatedSprite3D" type="AnimatedSprite2D" parent="EnemyActors/CultistActor/Visual" unique_id=1642558682]
 sprite_frames = SubResource("SpriteFrames_01fuj")
+
+[node name="HeadTarget" type="Marker2D" parent="EnemyActors/CultistActor"]
+position = Vector2(0, -105)
 
 [node name="TargetArea" type="Area2D" parent="EnemyActors/CultistActor" unique_id=500788714]
 
@@ -68,11 +73,16 @@ position = Vector2(0, -201)
 scale = Vector2(0.5, 0.5)
 texture = SubResource("CompressedTexture2D_jlq6r")
 
-[node name="BattleController" type="Node" parent="." unique_id=1347460764 node_paths=PackedStringArray("enemy_actors")]
+[node name="BattlePresentationDirector" type="Node" parent="." node_paths=PackedStringArray("shake_target")]
+script = ExtResource("7_present")
+shake_target = NodePath("../EnemyActors")
+
+[node name="BattleController" type="Node" parent="." unique_id=1347460764 node_paths=PackedStringArray("enemy_actors", "presentation_director")]
 script = ExtResource("2_c6bvs")
 player_definitions = Array[ExtResource("2_furec")]([ExtResource("3_jn58a"), ExtResource("6_qt72d")])
 enemy_definitions = Array[ExtResource("2_furec")]([ExtResource("4_jn58a")])
 enemy_actors = [NodePath("../EnemyActors/CultistActor")]
+presentation_director = NodePath("../BattlePresentationDirector")
 
 [node name="BattleHUD" parent="." unique_id=601674235 node_paths=PackedStringArray("battle_controller") instance=ExtResource("1_1yf7f")]
 battle_controller = NodePath("../BattleController")

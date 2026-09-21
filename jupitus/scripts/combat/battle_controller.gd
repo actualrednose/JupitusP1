@@ -10,23 +10,42 @@ class_name BattleController
 @export var attack_action: StringName = &"interact"
 @export var guard_action: StringName = &"ui_cancel"
 @export var resolve_action: StringName = &"ui_accept"
+## Shows enemy action text above their sprites when enabled.
+@export var debug_show_enemy_intents: bool = false:
+	set(value):
+		debug_show_enemy_intents = value
+
+		if is_inside_tree():
+			_set_enemy_intent_debug_visibility()
+
 @export_group("Battle Actors")
 @export var enemy_actors: Array[BattleEnemyActor] = []
-## Temporary result used until the timing minigame exists.
-## 3 = PERFECT, 2 = GOOD, 1 = MISS, 0 = NONE.
-@export_range(0, 3) var debug_timing_result: int = BattleAction.TimingResult.PERFECT
+## Optional presentation director. One is created automatically when unassigned.
+@export var presentation_director: BattlePresentationDirector
+
 signal player_action_changed(action: BattleAction)
+signal active_player_changed(player: CombatantState)
+signal enemy_intent_changed(intent: EnemyActionIntent)
+signal timing_requested(
+	action: BattleAction,
+	target_position: Vector2
+)
 
 var battle_session: BattleSession
 var selected_player_action: BattleAction = null
-var enemy_action_queued: bool = false
+var selected_player_actions: Dictionary = {}
+var enemy_intents: Dictionary = {}
+var active_player: CombatantState = null
+var enemy_actions_queued: bool = false
 
 
 func _ready() -> void:
 	battle_session = BattleSession.new()
+	_ensure_presentation_director()
 
 	battle_session.phase_changed.connect(_on_phase_changed)
 	battle_session.action_queued.connect(_on_action_queued)
+	battle_session.timing_requested.connect(_on_timing_requested)
 	battle_session.action_started.connect(_on_action_started)
 	battle_session.action_resolved.connect(_on_action_resolved)
 	battle_session.action_cancelled.connect(_on_action_cancelled)
@@ -37,6 +56,7 @@ func _ready() -> void:
 	battle_session.battle_lost.connect(_on_battle_lost)
 
 	battle_session.setup(player_definitions, enemy_definitions)
+	presentation_director.setup(battle_session)
 	_bind_enemy_actors()
 
 	if auto_start:
@@ -72,8 +92,8 @@ func _select_guard() -> void:
 func _resolve_turn() -> void:
 	confirm_turn()
 
-func _queue_enemy_action() -> void:
-	if enemy_action_queued:
+func _queue_enemy_actions() -> void:
+	if enemy_actions_queued:
 		return
 
 	if battle_session.enemies.is_empty():
@@ -82,29 +102,66 @@ func _queue_enemy_action() -> void:
 	if battle_session.player_party.is_empty():
 		return
 
-	var enemy: CombatantState = battle_session.enemies[0]
-	var target: CombatantState = _get_first_living_player()
+	for enemy in battle_session.enemies:
+		if enemy.is_defeated():
+			continue
 
-	if enemy.is_defeated() or target == null:
-		return
+		var profile := enemy.definition.ai_profile
 
-	var ability: AbilityDefinition = enemy.definition.main_attack
+		if profile == null:
+			print(
+				"Enemy AI [Round %d]: %s -> No AI profile"
+				% [
+					battle_session.turn_number,
+					enemy.definition.display_name
+				]
+			)
+			continue
 
-	# For testing, prefer the enemy's power attack when one is configured.
-	if enemy.definition.power_attack != null:
-		ability = enemy.definition.power_attack
-
-	if ability == null:
-		push_warning(
-			"BattleController: '%s' has no attack ability"
-			% enemy.definition.display_name
+		var table_name := profile.get_matching_table_name(
+			enemy,
+			battle_session
 		)
-		return
 
-	var action := battle_session.queue_action(enemy, ability, target)
+		if table_name == "Base actions":
+			table_name = "Base actions (no conditional matched)"
 
-	if action != null:
-		enemy_action_queued = true
+		print(
+			"Enemy AI [Round %d]: %s -> %s"
+			% [
+				battle_session.turn_number,
+				enemy.definition.display_name,
+				table_name
+			]
+		)
+
+		var intent := BattleAI.choose_intent(
+			enemy,
+			profile,
+			battle_session
+		)
+
+		if intent == null:
+			push_warning(
+				"BattleController: '%s' could not choose a valid AI action"
+				% enemy.definition.display_name
+			)
+			continue
+
+		var action := battle_session.queue_action(
+			enemy,
+			intent.ability,
+			intent.target
+		)
+
+		if action == null:
+			continue
+
+		enemy_intents[enemy] = intent
+		_set_enemy_actor_intent(enemy, intent)
+		enemy_intent_changed.emit(intent)
+
+	enemy_actions_queued = true
 
 
 func _get_first_living_enemy() -> CombatantState:
@@ -128,11 +185,15 @@ func _on_phase_changed(new_phase: BattleSession.Phase) -> void:
 
 	if new_phase == BattleSession.Phase.COMMAND_SELECTION:
 		selected_player_action = null
-		enemy_action_queued = false
-		_queue_enemy_action()
+		selected_player_actions.clear()
+		enemy_intents.clear()
+		_clear_enemy_actor_intents()
+		enemy_actions_queued = false
+		_queue_enemy_actions()
+		_advance_active_player()
 
 	elif new_phase == BattleSession.Phase.TURN_COMPLETE:
-		battle_session.start_turn()
+		call_deferred("_start_next_turn")
 
 
 func _on_action_queued(action: BattleAction) -> void:
@@ -154,6 +215,10 @@ func _on_action_started(action: BattleAction) -> void:
 		]
 	)
 
+	if action.actor.team == CombatantState.Team.ENEMY:
+		enemy_intents.erase(action.actor)
+		_set_enemy_actor_intent(action.actor, null)
+
 
 func _on_action_resolved(action: BattleAction) -> void:
 	print(
@@ -170,6 +235,10 @@ func _on_action_cancelled(action: BattleAction) -> void:
 			action.ability.display_name
 		]
 	)
+
+	if action.actor.team == CombatantState.Team.ENEMY:
+		enemy_intents.erase(action.actor)
+		_set_enemy_actor_intent(action.actor, null)
 
 
 func _on_damage_applied(
@@ -189,8 +258,6 @@ func _on_damage_applied(
 		]
 	)
 
-	_sync_enemy_actors()
-
 
 func _on_power_attack_started(enemy: CombatantState) -> void:
 	print(
@@ -199,6 +266,7 @@ func _on_power_attack_started(enemy: CombatantState) -> void:
 	)
 
 	_sync_enemy_actors()
+	presentation_director.present_power_attack_charge(enemy)
 
 
 func _on_power_attack_disrupted(enemy: CombatantState) -> void:
@@ -207,13 +275,13 @@ func _on_power_attack_disrupted(enemy: CombatantState) -> void:
 		% enemy.definition.display_name
 	)
 
-	_sync_enemy_actors()
-
 func _on_battle_won() -> void:
+	_clear_enemy_actor_intents()
 	print("BATTLE WON")
 
 
 func _on_battle_lost() -> void:
+	_clear_enemy_actor_intents()
 	print("BATTLE LOST")
 	
 func start_battle() -> void:
@@ -226,16 +294,13 @@ func start_battle() -> void:
 
 
 func choose_main_attack(target: CombatantState) -> void:
-	if selected_player_action != null:
-		return
-
 	if target == null or target.is_defeated():
 		return
 
-	if battle_session.player_party.is_empty():
-		return
+	var player := get_current_player()
 
-	var player: CombatantState = battle_session.player_party[0]
+	if player == null:
+		return
 
 	if player.definition.main_attack == null:
 		push_warning(
@@ -244,29 +309,23 @@ func choose_main_attack(target: CombatantState) -> void:
 		)
 		return
 
-	selected_player_action = battle_session.queue_action(
+	var action := battle_session.queue_action(
 		player,
 		player.definition.main_attack,
 		target
 	)
 
-	if selected_player_action == null:
+	if action == null:
 		return
 
-	# Temporary until the timing minigame is added.
-	selected_player_action.timing_result = debug_timing_result
-
-	player_action_changed.emit(selected_player_action)
+	_record_player_action(player, action)
 
 
 func choose_guard() -> void:
-	if selected_player_action != null:
-		return
+	var player := get_current_player()
 
-	if battle_session.player_party.is_empty():
+	if player == null:
 		return
-
-	var player: CombatantState = battle_session.player_party[0]
 
 	if player.definition.guard_ability == null:
 		push_warning(
@@ -275,24 +334,261 @@ func choose_guard() -> void:
 		)
 		return
 
-	selected_player_action = battle_session.queue_action(
+	var action := battle_session.queue_action(
 		player,
 		player.definition.guard_ability
 	)
 
-	if selected_player_action == null:
+	if action == null:
 		return
 
-	player_action_changed.emit(selected_player_action)
+	_record_player_action(player, action)
+
+
+func choose_skill(
+	ability: AbilityDefinition,
+	target: CombatantState = null
+) -> void:
+	var player := get_current_player()
+
+	if player == null or ability == null:
+		return
+
+	if not player.definition.skills.has(ability):
+		push_warning(
+			"BattleController: '%s' does not know '%s'"
+			% [
+				player.definition.display_name,
+				ability.display_name
+			]
+		)
+		return
+
+	var action := battle_session.queue_action(
+		player,
+		ability,
+		target
+	)
+
+	if action == null:
+		return
+
+	_record_player_action(player, action)
+
+
+func get_current_player() -> CombatantState:
+	if active_player == null or active_player.is_defeated():
+		return null
+
+	return active_player
+
+
+func all_player_actions_selected() -> bool:
+	var living_player_found := false
+
+	for player in battle_session.player_party:
+		if player.is_defeated():
+			continue
+
+		living_player_found = true
+
+		if not selected_player_actions.has(player):
+			return false
+
+	return living_player_found
 
 
 func confirm_turn() -> void:
-	if selected_player_action == null:
+	if not all_player_actions_selected():
 		return
 
 	selected_player_action = null
 	battle_session.resolve_actions()
-	
+
+
+func reselect_player(player: CombatantState) -> bool:
+	if (
+		battle_session == null
+		or battle_session.phase
+			!= BattleSession.Phase.COMMAND_SELECTION
+		or player == null
+		or player.is_defeated()
+		or not battle_session.player_party.has(player)
+		or not selected_player_actions.has(player)
+	):
+		return false
+
+	var removed_action := (
+		battle_session.remove_queued_action(player)
+	)
+
+	if removed_action == null:
+		return false
+
+	selected_player_actions.erase(player)
+	selected_player_action = null
+	active_player = player
+
+	player_action_changed.emit(null)
+	active_player_changed.emit(active_player)
+	return true
+
+
+func return_to_previous_player() -> bool:
+	if (
+		battle_session == null
+		or battle_session.phase
+			!= BattleSession.Phase.COMMAND_SELECTION
+	):
+		return false
+
+	var start_index := (
+		battle_session.player_party.size() - 1
+	)
+
+	if active_player != null:
+		start_index = (
+			battle_session.player_party.find(
+				active_player
+			) - 1
+		)
+
+	for index in range(start_index, -1, -1):
+		var player := (
+			battle_session.player_party[index]
+		)
+
+		if selected_player_actions.has(player):
+			return reselect_player(player)
+
+	return false
+
+
+func skip_action_presentation() -> void:
+	if battle_session == null:
+		return
+
+	if (
+		presentation_director != null
+		and presentation_director.is_presenting()
+	):
+		presentation_director.skip_current_presentation()
+	else:
+		battle_session.continue_resolution()
+
+
+func set_presentation_fast_forwarding(value: bool) -> void:
+	if presentation_director != null:
+		presentation_director.set_fast_forwarding(value)
+
+
+func submit_timing_result(
+	action: BattleAction,
+	timing_result: BattleAction.TimingResult,
+	timing_success_count: int = 0
+) -> bool:
+	if battle_session == null:
+		return false
+
+	return battle_session.submit_timing_result(
+		action,
+		timing_result,
+		timing_success_count
+	)
+
+
+func _record_player_action(
+	player: CombatantState,
+	action: BattleAction
+) -> void:
+	selected_player_action = action
+	selected_player_actions[player] = action
+	player_action_changed.emit(action)
+	_advance_active_player()
+
+	if all_player_actions_selected():
+		call_deferred("_confirm_if_ready")
+
+
+func _advance_active_player() -> void:
+	var next_player: CombatantState = null
+
+	for player in battle_session.player_party:
+		if (
+			not player.is_defeated()
+			and not selected_player_actions.has(player)
+		):
+			next_player = player
+			break
+
+	active_player = next_player
+	active_player_changed.emit(active_player)
+
+
+func _start_next_turn() -> void:
+	if battle_session.phase == BattleSession.Phase.TURN_COMPLETE:
+		battle_session.start_turn()
+
+
+func _confirm_if_ready() -> void:
+	if (
+		battle_session.phase
+			== BattleSession.Phase.COMMAND_SELECTION
+		and all_player_actions_selected()
+	):
+		confirm_turn()
+
+
+func _on_timing_requested(
+	action: BattleAction
+) -> void:
+	if (
+		action == null
+		or action.target == null
+	):
+		push_error(
+			"BattleController: timed action has no target"
+		)
+		battle_session.submit_timing_result(
+			action,
+			BattleAction.TimingResult.NONE
+		)
+		return
+
+	var target_actor := _find_enemy_actor(
+		action.target
+	)
+
+	if target_actor == null:
+		push_error(
+			"BattleController: no enemy actor is bound to timing target '%s'"
+			% action.target.definition.display_name
+		)
+		battle_session.submit_timing_result(
+			action,
+			BattleAction.TimingResult.NONE
+		)
+		return
+
+	timing_requested.emit(
+		action,
+		target_actor.get_timing_target_position()
+	)
+
+
+func _find_enemy_actor(
+	enemy: CombatantState
+) -> BattleEnemyActor:
+	for actor in enemy_actors:
+		if (
+			actor != null
+			and actor.combatant == enemy
+		):
+			return actor
+
+	return null
+
+
 func _bind_enemy_actors() -> void:
 	var count: int = mini(
 		enemy_actors.size(),
@@ -302,6 +598,13 @@ func _bind_enemy_actors() -> void:
 	for i in range(count):
 		enemy_actors[i].bind_combatant(
 			battle_session.enemies[i]
+		)
+		presentation_director.register_view(
+			battle_session.enemies[i],
+			enemy_actors[i]
+		)
+		enemy_actors[i].set_debug_intent_visible(
+			debug_show_enemy_intents
 		)
 
 	if enemy_actors.size() != battle_session.enemies.size():
@@ -314,3 +617,36 @@ func _sync_enemy_actors() -> void:
 	for actor in enemy_actors:
 		if actor:
 			actor.sync_from_state()
+
+
+func _set_enemy_actor_intent(
+	enemy: CombatantState,
+	intent: EnemyActionIntent
+) -> void:
+	for actor in enemy_actors:
+		if actor != null and actor.combatant == enemy:
+			actor.set_intent(intent)
+			return
+
+
+func _clear_enemy_actor_intents() -> void:
+	for actor in enemy_actors:
+		if actor != null:
+			actor.set_intent(null)
+
+
+func _set_enemy_intent_debug_visibility() -> void:
+	for actor in enemy_actors:
+		if actor != null:
+			actor.set_debug_intent_visible(
+				debug_show_enemy_intents
+			)
+
+
+func _ensure_presentation_director() -> void:
+	if presentation_director != null:
+		return
+
+	presentation_director = BattlePresentationDirector.new()
+	presentation_director.name = "BattlePresentationDirector"
+	add_child(presentation_director)

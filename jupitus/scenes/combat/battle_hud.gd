@@ -3,6 +3,23 @@ class_name BattleHUD
 
 @export var battle_controller: BattleController
 
+@export_group("Emm Crosshair Timing")
+## Assign Emm's crosshair image here after importing it.
+## A simple temporary crosshair is drawn when this is empty.
+@export var emm_crosshair_texture: Texture2D
+## Horizontal travel speed in screen pixels per second.
+@export_range(100.0, 1600.0, 10.0) var emm_crosshair_speed: float = 500.0
+## Maximum horizontal distance from the head for a Killshot.
+@export_range(1.0, 100.0, 1.0) var emm_killshot_radius: float = 24.0
+## Maximum horizontal distance from the head for a Clean shot.
+@export_range(1.0, 240.0, 1.0) var emm_clean_shot_radius: float = 72.0
+
+@export_group("Roommate Direction Timing")
+## Seconds allowed to enter all three directions.
+@export_range(0.5, 10.0, 0.05) var roommate_input_time: float = 2.25
+## Played for every correct direction. Leave empty to disable.
+@export var roommate_punch_sound: AudioStream
+
 @onready var party_list: HBoxContainer = (
 	$Root/ScreenMargin/Layout/PartyList
 )
@@ -29,11 +46,14 @@ class_name BattleHUD
 
 var _refresh_pending: bool = false
 var selecting_attack_target: bool = false
-
-var _hp_bars: Dictionary = {}
-var _hp_value_labels: Dictionary = {}
-var _tempo_bars: Dictionary = {}
-var _tempo_value_labels: Dictionary = {}
+var selecting_ally_target: bool = false
+var _pending_target_ability: AbilityDefinition
+var _party_cards: Dictionary = {}
+var _presentation_director: BattlePresentationDirector
+var _skill_menu: HBoxContainer
+var _skill_menu_open: bool = false
+var _crosshair_minigame: CrosshairTimingMinigame
+var _direction_minigame: DirectionTimingMinigame
 
 
 func _ready() -> void:
@@ -46,7 +66,10 @@ func _ready() -> void:
 	attack_button.pressed.connect(_on_attack_pressed)
 	skill_button.pressed.connect(_on_skill_pressed)
 	guard_button.pressed.connect(_on_guard_pressed)
-	confirm_button.pressed.connect(_on_confirm_pressed)
+	confirm_button.visible = false
+	_create_skill_menu()
+	_create_crosshair_minigame()
+	_create_direction_minigame()
 
 	call_deferred("_connect_to_battle")
 
@@ -87,28 +110,11 @@ func _connect_to_battle() -> void:
 			_on_action_cancelled
 		)
 
-	if not session.damage_applied.is_connected(
-		_on_damage_applied
-	):
-		session.damage_applied.connect(_on_damage_applied)
-
-	if not session.healing_applied.is_connected(
-		_on_healing_applied
-	):
-		session.healing_applied.connect(_on_healing_applied)
-
 	if not session.power_attack_started.is_connected(
 		_on_power_attack_started
 	):
 		session.power_attack_started.connect(
 			_on_power_attack_started
-		)
-
-	if not session.power_attack_disrupted.is_connected(
-		_on_power_attack_disrupted
-	):
-		session.power_attack_disrupted.connect(
-			_on_power_attack_disrupted
 		)
 
 	if not session.battle_won.is_connected(
@@ -135,6 +141,32 @@ func _connect_to_battle() -> void:
 			_on_active_player_changed
 		)
 
+	if not battle_controller.timing_requested.is_connected(
+		_on_timing_requested
+	):
+		battle_controller.timing_requested.connect(
+			_on_timing_requested
+		)
+
+	_presentation_director = (
+		battle_controller.presentation_director
+	)
+
+	if _presentation_director != null:
+		if not _presentation_director.effect_presentation_started.is_connected(
+			_on_effect_presentation_started
+		):
+			_presentation_director.effect_presentation_started.connect(
+				_on_effect_presentation_started
+			)
+
+		if not _presentation_director.action_presentation_finished.is_connected(
+			_on_action_presentation_finished
+		):
+			_presentation_director.action_presentation_finished.connect(
+				_on_action_presentation_finished
+			)
+
 	for actor in battle_controller.enemy_actors:
 		if actor == null:
 			continue
@@ -150,6 +182,25 @@ func _connect_to_battle() -> void:
 	battle_controller.start_battle()
 
 
+func _process(_delta: float) -> void:
+	if battle_controller == null:
+		return
+
+	if _is_timing_minigame_active():
+		battle_controller.set_presentation_fast_forwarding(
+			false
+		)
+		return
+
+	var fast_forwarding := (
+		Input.is_action_pressed("interact")
+		or Input.is_action_pressed("ui_accept")
+	)
+	battle_controller.set_presentation_fast_forwarding(
+		fast_forwarding
+	)
+
+
 func _input(event: InputEvent) -> void:
 	if battle_controller == null:
 		return
@@ -157,21 +208,44 @@ func _input(event: InputEvent) -> void:
 	if battle_controller.battle_session == null:
 		return
 
-	if (
-		battle_controller.battle_session.phase
-		!= BattleSession.Phase.RESOLVING
-	):
+	if _is_timing_minigame_active():
+		if (
+			_direction_minigame != null
+			and _direction_minigame.is_active()
+			and _direction_minigame.handle_input(event)
+		):
+			get_viewport().set_input_as_handled()
+			return
+
+		if _crosshair_minigame.handle_input(event):
+			get_viewport().set_input_as_handled()
+
 		return
 
-	var should_skip := false
+	var phase := battle_controller.battle_session.phase
 
-	if event.is_action_pressed("interact"):
-		should_skip = true
+	if phase == BattleSession.Phase.COMMAND_SELECTION:
+		if event is InputEventMouseButton:
+			var mouse_event := (
+				event as InputEventMouseButton
+			)
 
-	elif event.is_action_pressed("ui_accept"):
-		should_skip = true
+			if (
+				mouse_event.button_index
+					== MOUSE_BUTTON_RIGHT
+				and mouse_event.pressed
+			):
+				_go_back()
+				get_viewport().set_input_as_handled()
 
-	elif event is InputEventMouseButton:
+		return
+
+	if phase != BattleSession.Phase.RESOLVING:
+		return
+
+	var should_skip := event.is_action_pressed("ui_cancel")
+
+	if event is InputEventMouseButton:
 		var mouse_event := event as InputEventMouseButton
 
 		if (
@@ -184,6 +258,7 @@ func _input(event: InputEvent) -> void:
 		return
 
 	battle_controller.skip_action_presentation()
+
 	get_viewport().set_input_as_handled()
 
 
@@ -197,6 +272,10 @@ func _on_attack_pressed() -> void:
 		return
 
 	selecting_attack_target = true
+	selecting_ally_target = false
+	_pending_target_ability = null
+	_hide_skill_menu()
+	_set_enemy_target_selection_enabled(true)
 
 	status_label.text = (
 		"%s: choose an enemy target."
@@ -211,60 +290,21 @@ func _on_skill_pressed() -> void:
 		return
 
 	var player := battle_controller.get_current_player()
-	var skill := _get_current_skill()
 
-	if player == null or skill == null:
+	if player == null or player.definition.skills.is_empty():
 		return
 
-	if player.current_tempo < skill.tempo_cost:
-		status_label.text = (
-			"%s needs %d Tempo to use %s."
-			% [
-				player.definition.display_name,
-				skill.tempo_cost,
-				skill.display_name
-			]
-		)
-		return
-
-	battle_controller.choose_skill(
-		skill,
-		player
-	)
-
-	_refresh()
+	_cancel_target_selection()
+	_show_skill_menu(player)
 
 
 func _on_guard_pressed() -> void:
 	if not _is_command_selection_active():
 		return
 
-	selecting_attack_target = false
+	_cancel_target_selection()
+	_hide_skill_menu()
 	battle_controller.choose_guard()
-	_refresh()
-
-
-func _on_confirm_pressed() -> void:
-	if not _is_command_selection_active():
-		return
-
-	if not battle_controller.all_player_actions_selected():
-		var player := battle_controller.get_current_player()
-
-		if player != null:
-			status_label.text = (
-				"%s still needs to choose an action."
-				% player.definition.display_name
-			)
-		else:
-			status_label.text = (
-				"Every living character must choose an action."
-			)
-
-		return
-
-	selecting_attack_target = false
-	battle_controller.confirm_turn()
 	_refresh()
 
 
@@ -290,233 +330,67 @@ func _refresh_now() -> void:
 
 
 func _refresh_party() -> void:
-	_hp_bars.clear()
-	_hp_value_labels.clear()
-	_tempo_bars.clear()
-	_tempo_value_labels.clear()
-
-	_clear_container(party_list)
-
 	var active_player := battle_controller.get_current_player()
 
 	for player in battle_controller.battle_session.player_party:
-		var card := HBoxContainer.new()
+		var card := _party_cards.get(player) as BattlePartyCard
 
-		card.custom_minimum_size = Vector2(300.0, 120.0)
-		card.add_theme_constant_override("separation", 12)
+		if card == null:
+			card = BattlePartyCard.new()
+			party_list.add_child(card)
+			card.bind_combatant(player)
+			card.clicked.connect(
+				_on_party_card_clicked
+			)
+			_party_cards[player] = card
 
-		if player == active_player:
-			card.modulate = Color("#FFF0B0")
-		else:
-			card.modulate = Color.WHITE
+			if _presentation_director != null:
+				_presentation_director.register_view(
+					player,
+					card
+				)
 
-		var icon := TextureRect.new()
-		icon.texture = player.definition.icon
-		icon.custom_minimum_size = Vector2(96.0, 96.0)
-		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		icon.pivot_offset = Vector2(48.0, 48.0)
-
-		_animate_party_icon(icon)
-
-		card.add_child(icon)
-
-		var stats := VBoxContainer.new()
-		stats.custom_minimum_size = Vector2(190.0, 0.0)
-		stats.add_theme_constant_override("separation", 4)
-		card.add_child(stats)
-
-		var name_label := Label.new()
-		name_label.text = player.definition.display_name
-		name_label.add_theme_font_size_override("font_size", 22)
-		name_label.add_theme_color_override(
-			"font_color",
-			Color("#202020")
+		card.set_active(player == active_player)
+		card.set_selected_action(
+			battle_controller.selected_player_actions.get(
+				player
+			) as BattleAction
 		)
-		stats.add_child(name_label)
-
-		var hp_row := _make_stat_row(
-			"HP:",
-			player.current_hp,
-			player.definition.max_hp,
-			Color("#62D84E")
-		)
-
-		stats.add_child(hp_row)
-
-		_hp_bars[player] = (
-			hp_row.get_child(1) as ProgressBar
-		)
-
-		_hp_value_labels[player] = (
-			hp_row.get_child(2) as Label
-		)
-
-		var tempo_row := _make_stat_row(
-			"TEMPO:",
-			player.current_tempo,
-			player.definition.max_tempo,
-			Color("#E5A24E")
-		)
-
-		stats.add_child(tempo_row)
-
-		_tempo_bars[player] = (
-			tempo_row.get_child(1) as ProgressBar
-		)
-
-		_tempo_value_labels[player] = (
-			tempo_row.get_child(2) as Label
-		)
-
-		if player.is_guarding:
-			var guard_label := Label.new()
-			guard_label.text = "GUARDING"
-			stats.add_child(guard_label)
-
-		if player.is_defeated():
-			var defeated_label := Label.new()
-			defeated_label.text = "DEFEATED"
-			stats.add_child(defeated_label)
-
-		party_list.add_child(card)
-
-
-func _animate_party_icon(icon: TextureRect) -> void:
-	var tween := icon.create_tween()
-
-	tween.set_loops()
-	tween.set_trans(Tween.TRANS_SINE)
-	tween.set_ease(Tween.EASE_IN_OUT)
-
-	tween.tween_property(
-		icon,
-		"rotation_degrees",
-		-3.0,
-		0.9
-	)
-
-	tween.tween_property(
-		icon,
-		"rotation_degrees",
-		3.0,
-		1.8
-	)
-
-	tween.tween_property(
-		icon,
-		"rotation_degrees",
-		0.0,
-		0.9
-	)
-
-
-func _make_stat_row(
-	label_text: String,
-	current_value: int,
-	max_value: int,
-	fill_color: Color
-) -> HBoxContainer:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 6)
-
-	var label := Label.new()
-	label.text = label_text
-	label.custom_minimum_size = Vector2(64.0, 0.0)
-	row.add_child(label)
-
-	var bar := ProgressBar.new()
-	bar.custom_minimum_size = Vector2(150.0, 20.0)
-	bar.max_value = max_value
-	bar.value = current_value
-	bar.show_percentage = false
-
-	bar.add_theme_stylebox_override(
-		"background",
-		_make_bar_style(Color("#D8D8D8"))
-	)
-
-	bar.add_theme_stylebox_override(
-		"fill",
-		_make_bar_style(fill_color)
-	)
-
-	row.add_child(bar)
-
-	var value_label := Label.new()
-	value_label.text = "%d/%d" % [
-		current_value,
-		max_value
-	]
-	value_label.custom_minimum_size = Vector2(65.0, 0.0)
-	row.add_child(value_label)
-
-	return row
-
-
-func _make_bar_style(color: Color) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-
-	style.bg_color = color
-	style.corner_radius_top_left = 4
-	style.corner_radius_top_right = 4
-	style.corner_radius_bottom_left = 4
-	style.corner_radius_bottom_right = 4
-
-	return style
-
-
-func _get_current_skill() -> AbilityDefinition:
-	var player := battle_controller.get_current_player()
-
-	if player == null:
-		return null
-
-	if player.definition.skills.is_empty():
-		return null
-
-	return player.definition.skills[0]
+		card.sync_from_state()
 
 
 func _refresh_commands() -> void:
 	var command_active := _is_command_selection_active()
 	var player := battle_controller.get_current_player()
-	var skill := _get_current_skill()
 
 	var can_choose_action := (
 		command_active
 		and player != null
 	)
 
+	attack_button.visible = not _skill_menu_open
 	attack_button.disabled = (
 		not can_choose_action
 		or selecting_attack_target
 	)
 
+	guard_button.visible = not _skill_menu_open
 	guard_button.disabled = not can_choose_action
 
 	if skill_button != null:
-		skill_button.visible = skill != null
+		var has_skills := (
+			player != null
+			and not player.definition.skills.is_empty()
+		)
+		skill_button.text = "Skills"
+		skill_button.visible = (
+			has_skills
+			and not _skill_menu_open
+		)
+		skill_button.disabled = not can_choose_action
 
-		if skill != null:
-			skill_button.text = (
-				"%s (%d)"
-				% [
-					skill.display_name,
-					skill.tempo_cost
-				]
-			)
-
-			skill_button.disabled = (
-				not can_choose_action
-				or player.current_tempo < skill.tempo_cost
-			)
-
-	confirm_button.disabled = (
-		not command_active
-		or not battle_controller.all_player_actions_selected()
-	)
+	if _skill_menu_open:
+		_refresh_skill_menu()
 
 
 func _is_command_selection_active() -> bool:
@@ -528,21 +402,21 @@ func _is_command_selection_active() -> bool:
 	)
 
 
-func _clear_container(container: Container) -> void:
-	for child in container.get_children():
-		child.free()
-
-
 func _on_phase_changed(
 	new_phase: BattleSession.Phase
 ) -> void:
 	if new_phase == BattleSession.Phase.COMMAND_SELECTION:
-		selecting_attack_target = false
+		_cancel_target_selection()
+		_hide_skill_menu()
 		status_label.text = "Choose an action."
 
 	elif new_phase == BattleSession.Phase.RESOLVING:
-		selecting_attack_target = false
-		status_label.text = "Resolving actions..."
+		_cancel_target_selection()
+		_hide_skill_menu()
+		status_label.text = (
+			"Resolving actions... "
+			+ "[Hold E to fast-forward; click or Esc to skip]"
+		)
 
 	elif new_phase == BattleSession.Phase.TURN_COMPLETE:
 		status_label.text = "Turn complete."
@@ -553,11 +427,12 @@ func _on_phase_changed(
 func _on_active_player_changed(
 	player: CombatantState
 ) -> void:
-	selecting_attack_target = false
+	_cancel_target_selection()
+	_hide_skill_menu()
 
 	if player == null:
 		status_label.text = (
-			"All actions selected. Confirm the turn."
+			"All actions selected. Starting round..."
 		)
 	else:
 		status_label.text = (
@@ -572,6 +447,94 @@ func _on_player_action_changed(
 	_action: BattleAction
 ) -> void:
 	_refresh()
+
+
+func _on_timing_requested(
+	action: BattleAction,
+	target_position: Vector2
+) -> void:
+	if (
+		action == null
+		or action.ability == null
+	):
+		return
+
+	match action.ability.timing_type:
+		AbilityDefinition.TimingType.CROSSHAIR_HEAD:
+			status_label.text = (
+				"Press E or click when the crosshair is over the enemy's head!"
+			)
+
+			var hud_target_position: Vector2 = (
+				$Root
+				.get_screen_transform()
+				.affine_inverse()
+				* target_position
+			)
+
+			_crosshair_minigame.start(
+				action,
+				hud_target_position
+			)
+
+		AbilityDefinition.TimingType.DIRECTION_SEQUENCE:
+			status_label.text = (
+				"Enter all %d directions before time runs out!"
+				% action.ability.timing_input_count
+			)
+			_direction_minigame.start(
+				action,
+				action.ability.timing_input_count
+			)
+
+		_:
+			push_error(
+				"BattleHUD: unsupported timing minigame type %d"
+				% action.ability.timing_type
+			)
+			battle_controller.submit_timing_result(
+				action,
+				BattleAction.TimingResult.NONE
+			)
+
+
+func _on_crosshair_timing_completed(
+	action: BattleAction,
+	timing_result: BattleAction.TimingResult,
+	feedback_text: String
+) -> void:
+	status_label.text = feedback_text
+
+	if not battle_controller.submit_timing_result(
+		action,
+		timing_result
+	):
+		push_error(
+			"BattleHUD: timing result was rejected"
+		)
+
+
+func _on_direction_correct_input() -> void:
+	if _presentation_director != null:
+		_presentation_director.play_timing_impact_shake()
+
+
+func _on_direction_timing_completed(
+	action: BattleAction,
+	timing_result: BattleAction.TimingResult,
+	feedback_text: String,
+	successful_inputs: int
+) -> void:
+	status_label.text = feedback_text
+
+	if not battle_controller.submit_timing_result(
+		action,
+		timing_result,
+		successful_inputs
+	):
+		push_error(
+			"BattleHUD: direction timing result was rejected"
+		)
 
 
 func _on_action_queued(
@@ -591,8 +554,9 @@ func _on_action_started(action: BattleAction) -> void:
 		message = "%s is guarding." % actor_name
 
 	elif (
-		action.ability.effect_type
-		== AbilityDefinition.EffectType.HEAL
+		action.ability.has_effect_type(
+			AbilityEffectDefinition.EffectType.HEAL
+		)
 	):
 		message = (
 			"%s used %s."
@@ -625,14 +589,25 @@ func _on_action_started(action: BattleAction) -> void:
 
 
 func _show_presentation_message(message: String) -> void:
+	_display_presentation_message(message)
+
+
+func _display_presentation_message(message: String) -> void:
 	status_label.text = (
-		"%s  [Click or press E to continue]"
+		"%s  [Hold E to fast-forward; click or Esc to skip]"
 		% message
 	)
 
 
 func _on_action_cancelled(action: BattleAction) -> void:
 	if action == null or action.actor == null:
+		return
+
+	if (
+		action.ability != null
+		and action.ability.is_power_attack
+		and action.actor.power_attack_disrupted
+	):
 		return
 
 	_show_presentation_message(
@@ -644,80 +619,66 @@ func _on_action_cancelled(action: BattleAction) -> void:
 	)
 
 
-func _on_damage_applied(
-	_action: BattleAction,
-	target: CombatantState,
-	amount: int
+func _on_effect_presentation_started(
+	result: BattleEffectResult
 ) -> void:
-	_show_damage_number(target, amount)
-	_animate_health_bar(target)
-
-
-func _on_healing_applied(
-	_action: BattleAction,
-	target: CombatantState,
-	amount: int
-) -> void:
-	_show_presentation_message(
-		"%s recovered %d HP."
-		% [
-			target.definition.display_name,
-			amount
-		]
-	)
-
-	_animate_health_bar(target)
-
-
-func _show_damage_number(
-	target: CombatantState,
-	amount: int
-) -> void:
-	for actor in battle_controller.enemy_actors:
-		if actor == null:
-			continue
-
-		if actor.combatant == target:
-			actor.show_damage_number(amount)
-			return
-
-
-func _animate_health_bar(target: CombatantState) -> void:
-	var hp_bar := _hp_bars.get(target) as ProgressBar
-	var hp_label := _hp_value_labels.get(target) as Label
-
-	if hp_bar == null:
-		_refresh()
+	if result == null or result.target == null:
 		return
 
-	var tween := create_tween()
+	if result.missed:
+		_show_presentation_message(
+			"%s missed."
+			% result.source.definition.display_name
+		)
+		return
 
-	tween.tween_property(
-		hp_bar,
-		"value",
-		target.current_hp,
-		0.55
-	).set_trans(Tween.TRANS_QUAD).set_ease(
-		Tween.EASE_OUT
+	if result.disrupted:
+		_show_presentation_message(
+			"%s's POWER ATTACK was disrupted!"
+			% result.target.definition.display_name
+		)
+		return
+
+	match result.effect.effect_type:
+		AbilityEffectDefinition.EffectType.HEAL, AbilityEffectDefinition.EffectType.REVIVE:
+			_show_presentation_message(
+				"%s recovered %d HP."
+				% [
+					result.target.definition.display_name,
+					result.amount
+				]
+			)
+
+		AbilityEffectDefinition.EffectType.GUARD:
+			_show_presentation_message(
+				"%s braces for impact."
+				% result.target.definition.display_name
+			)
+
+		AbilityEffectDefinition.EffectType.APPLY_STATUS:
+			if result.effect.status != null:
+				_show_presentation_message(
+					"%s is affected by %s."
+					% [
+						result.target.definition.display_name,
+						result.effect.status.display_name
+					]
+				)
+
+		AbilityEffectDefinition.EffectType.CLEANSE:
+			_show_presentation_message(
+				"%s was cleansed."
+				% result.target.definition.display_name
+			)
+
+
+func _on_action_presentation_finished(
+	_action: BattleAction
+) -> void:
+	status_label.text = (
+		"Resolving actions... "
+		+ "[Hold E to fast-forward; click or Esc to skip]"
 	)
-
-	if hp_label != null:
-		hp_label.text = "%d/%d" % [
-			target.current_hp,
-			target.definition.max_hp
-		]
-
-	var tempo_bar := _tempo_bars.get(target) as ProgressBar
-	var tempo_label := _tempo_value_labels.get(target) as Label
-
-	if tempo_bar != null:
-		tempo_bar.value = target.current_tempo
-
-	if tempo_label != null:
-		tempo_label.text = "%d/%d" % [
-			target.current_tempo,
-			target.definition.max_tempo
-		]
 
 
 func _on_power_attack_started(
@@ -725,17 +686,6 @@ func _on_power_attack_started(
 ) -> void:
 	status_label.text = (
 		"%s is preparing a POWER ATTACK!"
-		% enemy.definition.display_name
-	)
-
-	_refresh()
-
-
-func _on_power_attack_disrupted(
-	enemy: CombatantState
-) -> void:
-	status_label.text = (
-		"%s's POWER ATTACK was disrupted!"
 		% enemy.definition.display_name
 	)
 
@@ -756,9 +706,6 @@ func _on_enemy_actor_clicked(
 	actor: BattleEnemyActor
 ) -> void:
 	if not selecting_attack_target:
-		status_label.text = (
-			"Press Attack before selecting a target."
-		)
 		return
 
 	if actor == null or actor.combatant == null:
@@ -768,10 +715,314 @@ func _on_enemy_actor_clicked(
 		status_label.text = "That enemy has been defeated."
 		return
 
-	selecting_attack_target = false
+	var ability := _pending_target_ability
+	_cancel_target_selection()
 
-	battle_controller.choose_main_attack(
-		actor.combatant
-	)
+	if ability != null:
+		battle_controller.choose_skill(
+			ability,
+			actor.combatant
+		)
+	else:
+		battle_controller.choose_main_attack(
+			actor.combatant
+		)
 
 	_refresh()
+
+
+func _create_skill_menu() -> void:
+	_skill_menu = HBoxContainer.new()
+	_skill_menu.name = "SkillMenu"
+	_skill_menu.visible = false
+	_skill_menu.add_theme_constant_override(
+		"separation",
+		12
+	)
+	attack_button.get_parent().add_child(_skill_menu)
+
+
+func _create_crosshair_minigame() -> void:
+	_crosshair_minigame = (
+		CrosshairTimingMinigame.new()
+	)
+	_crosshair_minigame.name = (
+		"CrosshairTimingMinigame"
+	)
+	$Root.add_child(_crosshair_minigame)
+	_crosshair_minigame.configure(
+		emm_crosshair_texture,
+		battle_controller.attack_action,
+		emm_crosshair_speed,
+		emm_killshot_radius,
+		emm_clean_shot_radius
+	)
+	_crosshair_minigame.completed.connect(
+		_on_crosshair_timing_completed
+	)
+
+
+func _create_direction_minigame() -> void:
+	_direction_minigame = (
+		DirectionTimingMinigame.new()
+	)
+	_direction_minigame.name = (
+		"DirectionTimingMinigame"
+	)
+	$Root.add_child(_direction_minigame)
+	_direction_minigame.configure(
+		roommate_input_time,
+		3,
+		roommate_punch_sound
+	)
+	_direction_minigame.correct_input.connect(
+		_on_direction_correct_input
+	)
+	_direction_minigame.completed.connect(
+		_on_direction_timing_completed
+	)
+
+
+func _is_timing_minigame_active() -> bool:
+	return (
+		(
+			_crosshair_minigame != null
+			and _crosshair_minigame.is_active()
+		)
+		or (
+			_direction_minigame != null
+			and _direction_minigame.is_active()
+		)
+	)
+
+
+func _show_skill_menu(
+	player: CombatantState
+) -> void:
+	_skill_menu_open = true
+	attack_button.visible = false
+	skill_button.visible = false
+	guard_button.visible = false
+	_skill_menu.visible = true
+	_populate_skill_menu(player)
+
+	status_label.text = (
+		"%s: choose a skill."
+		% player.definition.display_name
+	)
+
+
+func _hide_skill_menu() -> void:
+	_skill_menu_open = false
+	_skill_menu.visible = false
+	attack_button.visible = true
+	skill_button.visible = true
+	guard_button.visible = true
+
+
+func _populate_skill_menu(
+	player: CombatantState
+) -> void:
+	for child in _skill_menu.get_children():
+		child.free()
+
+	for skill in player.definition.skills:
+		if skill == null:
+			continue
+
+		var button := Button.new()
+		button.custom_minimum_size = Vector2(140.0, 48.0)
+		button.text = "%s (%d)" % [
+			skill.display_name,
+			skill.tempo_cost
+		]
+		button.disabled = (
+			player.current_tempo < skill.tempo_cost
+		)
+		button.pressed.connect(
+			_on_skill_selected.bind(skill)
+		)
+		_skill_menu.add_child(button)
+
+	var back_button := Button.new()
+	back_button.custom_minimum_size = Vector2(110.0, 48.0)
+	back_button.text = "Back"
+	back_button.pressed.connect(_on_skill_back_pressed)
+	_skill_menu.add_child(back_button)
+
+
+func _refresh_skill_menu() -> void:
+	var player := battle_controller.get_current_player()
+
+	if player == null:
+		_hide_skill_menu()
+		return
+
+	_populate_skill_menu(player)
+
+
+func _on_skill_selected(
+	ability: AbilityDefinition
+) -> void:
+	var player := battle_controller.get_current_player()
+
+	if player == null or ability == null:
+		return
+
+	if player.current_tempo < ability.tempo_cost:
+		status_label.text = (
+			"%s needs %d Tempo to use %s."
+			% [
+				player.definition.display_name,
+				ability.tempo_cost,
+				ability.display_name
+			]
+		)
+		return
+
+	var needs_enemy := _ability_uses_target_type(
+		ability,
+		AbilityEffectDefinition.TargetType.SELECTED_ENEMY
+	)
+	var needs_ally := _ability_uses_target_type(
+		ability,
+		AbilityEffectDefinition.TargetType.SELECTED_ALLY
+	)
+
+	if needs_enemy and needs_ally:
+		status_label.text = (
+			"%s needs incompatible enemy and ally targets."
+			% ability.display_name
+		)
+		return
+
+	_hide_skill_menu()
+	_pending_target_ability = ability
+
+	if needs_enemy:
+		selecting_attack_target = true
+		_set_enemy_target_selection_enabled(true)
+		status_label.text = (
+			"%s: choose an enemy target."
+			% ability.display_name
+		)
+		return
+
+	if needs_ally:
+		selecting_ally_target = true
+		status_label.text = (
+			"%s: choose a party member."
+			% ability.display_name
+		)
+		return
+
+	_pending_target_ability = null
+	battle_controller.choose_skill(ability)
+	_refresh()
+
+
+func _on_skill_back_pressed() -> void:
+	_hide_skill_menu()
+
+	var player := battle_controller.get_current_player()
+
+	if player != null:
+		status_label.text = (
+			"%s: choose an action."
+			% player.definition.display_name
+		)
+
+	_refresh()
+
+
+func _on_party_card_clicked(
+	player: CombatantState
+) -> void:
+	if not _is_command_selection_active():
+		return
+
+	if selecting_ally_target:
+		var ability := _pending_target_ability
+		_cancel_target_selection()
+
+		if ability != null:
+			battle_controller.choose_skill(
+				ability,
+				player
+			)
+
+		_refresh()
+		return
+
+	if battle_controller.reselect_player(player):
+		_cancel_target_selection()
+		_hide_skill_menu()
+		status_label.text = (
+			"%s: choose a different action."
+			% player.definition.display_name
+		)
+		_refresh()
+
+
+func _go_back() -> void:
+	if battle_controller.return_to_previous_player():
+		_cancel_target_selection()
+		_hide_skill_menu()
+
+		var player := battle_controller.get_current_player()
+
+		if player != null:
+			status_label.text = (
+				"%s: choose a different action."
+				% player.definition.display_name
+			)
+
+		_refresh()
+		return
+
+	if selecting_attack_target or selecting_ally_target:
+		_cancel_target_selection()
+		_hide_skill_menu()
+
+		var player := battle_controller.get_current_player()
+
+		if player != null:
+			status_label.text = (
+				"%s: choose an action."
+				% player.definition.display_name
+			)
+
+		_refresh()
+		return
+
+	if _skill_menu_open:
+		_on_skill_back_pressed()
+
+
+func _cancel_target_selection() -> void:
+	selecting_attack_target = false
+	selecting_ally_target = false
+	_pending_target_ability = null
+	_set_enemy_target_selection_enabled(false)
+
+
+func _set_enemy_target_selection_enabled(
+	value: bool
+) -> void:
+	for actor in battle_controller.enemy_actors:
+		if actor != null:
+			actor.set_target_selection_enabled(value)
+
+
+func _ability_uses_target_type(
+	ability: AbilityDefinition,
+	target_type: AbilityEffectDefinition.TargetType
+) -> bool:
+	for effect in ability.effects:
+		if (
+			effect != null
+			and effect.target_type == target_type
+		):
+			return true
+
+	return false

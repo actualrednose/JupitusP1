@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="AbilityDefinition" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/ability_definition.gd" id="1_ability"]
+[ext_resource type="Script" path="res://scripts/combat/ability_effect_definition.gd" id="2_effect"]
+
+[sub_resource type="Resource" id="Resource_damage"]
+script = ExtResource("2_effect")
+value_min = 10
+value_max = 20
+repeat_for_each_timing_success = true
+target_tempo_gain_min = 5
+target_tempo_gain_max = 10
+
+[sub_resource type="Resource" id="Resource_tempo"]
+script = ExtResource("2_effect")
+effect_type = 2
+target_type = 2
+value_min = 5
+value_max = 10
+timing_requirement = 1
+
+[resource]
+script = ExtResource("1_ability")
+display_name = "Flurry"
+action_verb = "unleashed a flurry"
+tempo_cost = 30
+effects = Array[ExtResource("2_effect")]([SubResource("Resource_damage"), SubResource("Resource_tempo")])
+action_priority = 10
+timing_type = 2
+timing_input_count = 6

@@ -67,6 +67,7 @@ layout_mode = 2
 text = "Guard"
 
 [node name="ConfirmButton" type="Button" parent="Root/ScreenMargin/Layout/CommandBar" unique_id=2122632084]
+visible = false
 custom_minimum_size = Vector2(140, 48)
 layout_mode = 2
 text = "Confirm"

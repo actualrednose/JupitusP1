@@ -1,0 +1,43 @@
+[gd_resource type="Resource" script_class="EnemyAIProfile" load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/enemy_ai_profile.gd" id="1_profile"]
+[ext_resource type="Script" path="res://scripts/combat/enemy_ai_action_chance.gd" id="2_action"]
+[ext_resource type="Script" path="res://scripts/combat/enemy_ai_condition.gd" id="3_condition"]
+[ext_resource type="Script" path="res://scripts/combat/enemy_ai_conditional_table.gd" id="4_table"]
+[ext_resource type="Resource" uid="uid://glo0wek0lkc7" path="res://resources/combat/enemy/MachineCultist/CultistMainAttack.tres" id="5_stab"]
+[ext_resource type="Resource" uid="uid://bixjblpv18ep" path="res://resources/combat/enemy/MachineCultist/CultistPowerSlash.tres" id="6_power"]
+
+[sub_resource type="Resource" id="BaseStab"]
+script = ExtResource("2_action")
+ability = ExtResource("5_stab")
+chance_percent = 70.0
+
+[sub_resource type="Resource" id="BasePowerSlash"]
+script = ExtResource("2_action")
+ability = ExtResource("6_power")
+chance_percent = 30.0
+
+[sub_resource type="Resource" id="LowHealthCondition"]
+script = ExtResource("3_condition")
+threshold_percent = 50.0
+
+[sub_resource type="Resource" id="LowHealthStab"]
+script = ExtResource("2_action")
+ability = ExtResource("5_stab")
+chance_percent = 40.0
+
+[sub_resource type="Resource" id="LowHealthPowerSlash"]
+script = ExtResource("2_action")
+ability = ExtResource("6_power")
+chance_percent = 60.0
+
+[sub_resource type="Resource" id="LowHealthTable"]
+script = ExtResource("4_table")
+table_name = "Below 50% HP"
+conditions = Array[ExtResource("3_condition")]([SubResource("LowHealthCondition")])
+actions = Array[ExtResource("2_action")]([SubResource("LowHealthStab"), SubResource("LowHealthPowerSlash")])
+
+[resource]
+script = ExtResource("1_profile")
+base_actions = Array[ExtResource("2_action")]([SubResource("BaseStab"), SubResource("BasePowerSlash")])
+conditional_tables = Array[ExtResource("4_table")]([SubResource("LowHealthTable")])

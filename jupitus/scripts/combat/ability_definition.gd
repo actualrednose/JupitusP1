@@ -11,64 +11,41 @@ enum Kind {
 enum TimingType {
 	NONE,
 	CROSSHAIR_HEAD,
+	DIRECTION_SEQUENCE,
 }
 
 @export_group("Identity")
 @export var display_name: String = "Ability"
+@export var action_verb: String = "attacked"
 @export var kind: Kind = Kind.SKILL
 
-@export_group("Cost and Power")
+@export_group("Cost")
 ## Tempo required to use this ability.
 @export_range(0, 100) var tempo_cost: int = 0
 
-## Base damage or effect strength.
-@export_range(0, 999) var power: int = 10
-
-@export_group("Tempo")
-## Tempo gained by the user when this ability is successfully used.
-@export_range(0, 10) var tempo_gain_on_use_min: int = 0
-@export_range(0, 10) var tempo_gain_on_use_max: int = 0
-
-## Tempo gained by the target when this ability deals damage.
-@export_range(0, 10) var tempo_gain_on_damage_min: int = 5
-@export_range(0, 10) var tempo_gain_on_damage_max: int = 10
+@export_group("Effects")
+@export var effects: Array[AbilityEffectDefinition] = []
 
 @export_group("Turn Order")
 ## Higher-priority actions resolve first.
 @export var action_priority: int = 0
 
 @export_group("Timing")
+## NONE resolves immediately.
+## CROSSHAIR_HEAD stops a horizontal crosshair over the target's head.
+## DIRECTION_SEQUENCE asks for a short sequence of directional inputs.
 @export var timing_type: TimingType = TimingType.NONE
-
-## A PERFECT result can disrupt a target's prepared power attack.
-@export var disrupts_power_attack_on_perfect: bool = false
+## Number of prompts used by sequence-based timing minigames.
+@export_range(1, 12) var timing_input_count: int = 3
 
 @export_group("Special Behavior")
 ## Used by enemy abilities that visibly prepare a dangerous attack.
 @export var is_power_attack: bool = false
 
 
-func get_tempo_gain_on_use() -> int:
-	var minimum: int = mini(
-		tempo_gain_on_use_min,
-		tempo_gain_on_use_max
-	)
-	var maximum: int = maxi(
-		tempo_gain_on_use_min,
-		tempo_gain_on_use_max
-	)
+func has_effect_type(effect_type: AbilityEffectDefinition.EffectType) -> bool:
+	for effect in effects:
+		if effect != null and effect.effect_type == effect_type:
+			return true
 
-	return randi_range(minimum, maximum)
-
-
-func get_tempo_gain_on_damage() -> int:
-	var minimum: int = mini(
-		tempo_gain_on_damage_min,
-		tempo_gain_on_damage_max
-	)
-	var maximum: int = maxi(
-		tempo_gain_on_damage_min,
-		tempo_gain_on_damage_max
-	)
-
-	return randi_range(minimum, maximum)
+	return false
