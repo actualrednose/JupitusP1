@@ -20,3 +20,7 @@ class_name CombatantDefinition
 @export_group("Enemy Behavior")
 ## Optional power attack the enemy AI can prepare.
 @export var power_attack: AbilityDefinition = null
+
+## Percentage-based decision profile used when this combatant is an enemy.
+## Leave this empty only for player characters or unfinished test enemies.
+@export var ai_profile: EnemyAIProfile = null
