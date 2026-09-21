@@ -1,0 +1,64 @@
+[gd_resource type="Resource" script_class="EnemyAIProfile" format=3 uid="uid://cmm1npe8ajxko"]
+
+[ext_resource type="Script" uid="uid://bpl36pt1664b5" path="res://scripts/combat/enemy_ai_action_chance.gd" id="1_5u7av"]
+[ext_resource type="Resource" uid="uid://glo0wek0lkc7" path="res://resources/combat/enemy/MachineCultist/CultistMainAttack.tres" id="2_j03jq"]
+[ext_resource type="Script" uid="uid://d0rrg7i0q2bbi" path="res://scripts/combat/enemy_ai_conditional_table.gd" id="2_oeiyh"]
+[ext_resource type="Script" uid="uid://cr5e4yr625jdx" path="res://scripts/combat/enemy_ai_profile.gd" id="3_gbtct"]
+[ext_resource type="Resource" uid="uid://bixjblpv18ep" path="res://resources/combat/enemy/MachineCultist/CultistPowerSlash.tres" id="4_hp4tv"]
+[ext_resource type="Script" uid="uid://d1v4kfsosxy6m" path="res://scripts/combat/enemy_ai_condition.gd" id="5_jdegx"]
+
+[sub_resource type="Resource" id="Resource_j03jq"]
+script = ExtResource("1_5u7av")
+ability = ExtResource("2_j03jq")
+chance_percent = 100.0
+intent_type = 1
+metadata/_custom_type_script = "uid://bpl36pt1664b5"
+
+[sub_resource type="Resource" id="Resource_qa34i"]
+script = ExtResource("1_5u7av")
+ability = ExtResource("2_j03jq")
+chance_percent = 50.0
+intent_type = 1
+metadata/_custom_type_script = "uid://bpl36pt1664b5"
+
+[sub_resource type="Resource" id="Resource_teg3u"]
+script = ExtResource("1_5u7av")
+ability = ExtResource("4_hp4tv")
+chance_percent = 50.0
+intent_type = 4
+metadata/_custom_type_script = "uid://bpl36pt1664b5"
+
+[sub_resource type="Resource" id="Resource_wef8n"]
+script = ExtResource("5_jdegx")
+metadata/_custom_type_script = "uid://d1v4kfsosxy6m"
+
+[sub_resource type="Resource" id="Resource_2a6n1"]
+script = ExtResource("2_oeiyh")
+table_name = "Condition 2"
+conditions = Array[ExtResource("5_jdegx")]([SubResource("Resource_wef8n")])
+actions = Array[ExtResource("1_5u7av")]([SubResource("Resource_qa34i"), SubResource("Resource_teg3u")])
+metadata/_custom_type_script = "uid://d0rrg7i0q2bbi"
+
+[sub_resource type="Resource" id="Resource_kl3i4"]
+script = ExtResource("1_5u7av")
+ability = ExtResource("4_hp4tv")
+chance_percent = 100.0
+metadata/_custom_type_script = "uid://bpl36pt1664b5"
+
+[sub_resource type="Resource" id="Resource_jdegx"]
+script = ExtResource("5_jdegx")
+threshold_percent = 95.0
+metadata/_custom_type_script = "uid://d1v4kfsosxy6m"
+
+[sub_resource type="Resource" id="Resource_hp4tv"]
+script = ExtResource("2_oeiyh")
+table_name = "Condition 1"
+conditions = Array[ExtResource("5_jdegx")]([SubResource("Resource_jdegx")])
+actions = Array[ExtResource("1_5u7av")]([SubResource("Resource_kl3i4")])
+metadata/_custom_type_script = "uid://d0rrg7i0q2bbi"
+
+[resource]
+script = ExtResource("3_gbtct")
+base_actions = Array[ExtResource("1_5u7av")]([SubResource("Resource_j03jq")])
+conditional_tables = Array[ExtResource("2_oeiyh")]([SubResource("Resource_2a6n1"), SubResource("Resource_hp4tv")])
+metadata/_custom_type_script = "uid://cr5e4yr625jdx"

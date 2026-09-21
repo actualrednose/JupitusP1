@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="AbilityDefinition" format=3 uid="uid://6yvnl2t6jodm"]
+
+[ext_resource type="Script" uid="uid://vfs2amss751j" path="res://scripts/combat/ability_effect_definition.gd" id="1_26ik1"]
+[ext_resource type="Script" uid="uid://c6203othnxyij" path="res://scripts/combat/ability_definition.gd" id="2_jv4t1"]
+
+[sub_resource type="Resource" id="Resource_s2r4l"]
+script = ExtResource("1_26ik1")
+value_min = 10
+value_max = 20
+target_tempo_gain_min = 5
+target_tempo_gain_max = 10
+metadata/_custom_type_script = "uid://vfs2amss751j"
+
+[sub_resource type="Resource" id="Resource_4pa44"]
+script = ExtResource("1_26ik1")
+effect_type = 2
+target_type = 2
+value_min = 5
+value_max = 10
+metadata/_custom_type_script = "uid://vfs2amss751j"
+
+[resource]
+script = ExtResource("2_jv4t1")
+display_name = "Attack"
+kind = 0
+effects = Array[ExtResource("1_26ik1")]([SubResource("Resource_s2r4l"), SubResource("Resource_4pa44")])
+metadata/_custom_type_script = "uid://c6203othnxyij"

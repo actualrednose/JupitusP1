@@ -1,10 +1,18 @@
 [gd_resource type="Resource" script_class="AbilityDefinition" format=3 uid="uid://dmdwov5faitb3"]
 
+[ext_resource type="Script" uid="uid://vfs2amss751j" path="res://scripts/combat/ability_effect_definition.gd" id="1_mif1r"]
 [ext_resource type="Script" uid="uid://c6203othnxyij" path="res://scripts/combat/ability_definition.gd" id="1_sox3o"]
+
+[sub_resource type="Resource" id="Resource_xrx15"]
+script = ExtResource("1_mif1r")
+effect_type = 3
+target_type = 2
+metadata/_custom_type_script = "uid://vfs2amss751j"
 
 [resource]
 script = ExtResource("1_sox3o")
 display_name = "Guard"
 kind = 2
+effects = Array[ExtResource("1_mif1r")]([SubResource("Resource_xrx15")])
 action_priority = 100
 metadata/_custom_type_script = "uid://c6203othnxyij"

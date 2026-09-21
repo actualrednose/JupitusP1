@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="CombatantDefinition" format=3 uid="uid://dewsorv62rs2v"]
 
+[ext_resource type="Resource" uid="uid://cmm1npe8ajxko" path="res://resources/combat/enemy/MachineCultist/CultistAI.tres" id="1_7oh5e"]
 [ext_resource type="Script" uid="uid://1d82jwvuc7el" path="res://scripts/combat/combatant_definition.gd" id="1_jsolp"]
 [ext_resource type="Texture2D" uid="uid://de6kri33m8e8d" path="res://icon.svg" id="1_wuwfo"]
 [ext_resource type="Script" uid="uid://c6203othnxyij" path="res://scripts/combat/ability_definition.gd" id="2_qwliv"]
@@ -13,4 +14,5 @@ display_name = "Strange Man"
 icon = ExtResource("1_wuwfo")
 main_attack = ExtResource("2_tajll")
 power_attack = ExtResource("4_tajll")
+ai_profile = ExtResource("1_7oh5e")
 metadata/_custom_type_script = "uid://1d82jwvuc7el"

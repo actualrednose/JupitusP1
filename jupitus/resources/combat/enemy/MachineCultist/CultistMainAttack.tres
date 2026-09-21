@@ -1,11 +1,18 @@
 [gd_resource type="Resource" script_class="AbilityDefinition" format=3 uid="uid://glo0wek0lkc7"]
 
 [ext_resource type="Script" uid="uid://c6203othnxyij" path="res://scripts/combat/ability_definition.gd" id="1_jv41o"]
+[ext_resource type="Script" uid="uid://vfs2amss751j" path="res://scripts/combat/ability_effect_definition.gd" id="1_pk3nx"]
+
+[sub_resource type="Resource" id="Resource_6nap5"]
+script = ExtResource("1_pk3nx")
+value_min = 10
+value_max = 10
+target_tempo_gain_min = 5
+target_tempo_gain_max = 10
+metadata/_custom_type_script = "uid://vfs2amss751j"
 
 [resource]
 script = ExtResource("1_jv41o")
 display_name = "Stab"
-kind = 0
-effect_value_min = 1
-effect_value_max = 30
+effects = Array[ExtResource("1_pk3nx")]([SubResource("Resource_6nap5")])
 metadata/_custom_type_script = "uid://c6203othnxyij"

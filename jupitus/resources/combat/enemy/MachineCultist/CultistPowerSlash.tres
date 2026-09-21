@@ -1,9 +1,19 @@
 [gd_resource type="Resource" script_class="AbilityDefinition" format=3 uid="uid://bixjblpv18ep"]
 
 [ext_resource type="Script" uid="uid://c6203othnxyij" path="res://scripts/combat/ability_definition.gd" id="1_7gb1d"]
+[ext_resource type="Script" uid="uid://vfs2amss751j" path="res://scripts/combat/ability_effect_definition.gd" id="1_teo1j"]
+
+[sub_resource type="Resource" id="Resource_xrx15"]
+script = ExtResource("1_teo1j")
+value_min = 20
+value_max = 30
+target_tempo_gain_min = 5
+target_tempo_gain_max = 10
+metadata/_custom_type_script = "uid://vfs2amss751j"
 
 [resource]
 script = ExtResource("1_7gb1d")
 display_name = "Power Slash"
+effects = Array[ExtResource("1_teo1j")]([SubResource("Resource_xrx15")])
 is_power_attack = true
 metadata/_custom_type_script = "uid://c6203othnxyij"
