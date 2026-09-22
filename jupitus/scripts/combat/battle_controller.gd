@@ -30,7 +30,9 @@ class_name BattleController
 
 ## Optional presentation director. One is created automatically when unassigned.
 @export var presentation_director: BattlePresentationDirector
-
+@export_group("Turn Flow")
+## Time the turn-complete message remains visible before the next turn starts.
+@export_range(0.0, 5.0, 0.05) var turn_complete_duration: float = 1.0
 
 signal player_action_changed(action: BattleAction)
 signal active_player_changed(player: CombatantState)
@@ -48,7 +50,7 @@ var selected_player_actions: Dictionary = {}
 var enemy_intents: Dictionary = {}
 var active_player: CombatantState = null
 var enemy_actions_queued: bool = false
-
+var _turn_complete_stage_id: int = 0
 
 func _ready() -> void:
 	battle_session = BattleSession.new()
@@ -266,8 +268,10 @@ func _on_phase_changed(
 		_advance_active_player()
 
 	elif new_phase == BattleSession.Phase.TURN_COMPLETE:
-		call_deferred("_start_next_turn")
-
+		_turn_complete_stage_id += 1
+		_start_next_turn_after_delay.call_deferred(
+			_turn_complete_stage_id
+		)
 
 func _on_action_queued(
 	action: BattleAction
@@ -596,7 +600,18 @@ func skip_action_presentation() -> void:
 		presentation_director.skip_current_presentation()
 	else:
 		battle_session.continue_resolution()
+		
+func skip_presentation_text_stage() -> void:
+	if (
+		presentation_director != null
+		and presentation_director.is_presenting()
+	):
+		presentation_director.skip_current_text_stage()
 
+
+func advance_turn_complete_stage() -> void:
+	_turn_complete_stage_id += 1
+	_start_next_turn()
 
 func set_presentation_fast_forwarding(
 	value: bool
@@ -650,11 +665,26 @@ func _advance_active_player() -> void:
 	active_player = next_player
 	active_player_changed.emit(active_player)
 
-
 func _start_next_turn() -> void:
-	if battle_session.phase == BattleSession.Phase.TURN_COMPLETE:
+	if (
+		battle_session.phase
+		== BattleSession.Phase.TURN_COMPLETE
+	):
 		battle_session.start_turn()
 
+
+func _start_next_turn_after_delay(
+	stage_id: int
+) -> void:
+	if turn_complete_duration > 0.0:
+		await get_tree().create_timer(
+			turn_complete_duration
+		).timeout
+
+	if stage_id != _turn_complete_stage_id:
+		return
+
+	_start_next_turn()
 
 func _confirm_if_ready() -> void:
 	if (

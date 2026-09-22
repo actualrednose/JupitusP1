@@ -9,6 +9,8 @@ signal presentation_skipped(action: BattleAction)
 @export_group("Timing")
 ## Overall presentation speed. Values above 1 make every stage faster.
 @export_range(0.25, 4.0, 0.05) var animation_speed: float = 1.0
+## Minimum time each action or effect message remains visible.
+@export_range(0.0, 5.0, 0.05) var text_stage_duration: float = 1.0
 ## Time spent telegraphing an ordinary action before it moves toward its target.
 @export_range(0.0, 2.0, 0.01) var anticipation_duration: float = 0.18
 ## Additional anticipation for a power attack.
@@ -61,7 +63,7 @@ var _shake_tween: Tween
 var _effect_audio: AudioStreamPlayer
 var _accent_audio: AudioStreamPlayer
 var _charge_audio: AudioStreamPlayer
-
+var _text_stage_skip_requested: bool = false
 
 func _ready() -> void:
 	_effect_audio = AudioStreamPlayer.new()
@@ -130,6 +132,9 @@ func set_fast_forwarding(value: bool) -> void:
 func is_presenting() -> bool:
 	return _presenting
 
+func skip_current_text_stage() -> void:
+	if _presenting:
+		_text_stage_skip_requested = true
 
 func present_power_attack_charge(
 	combatant: CombatantState
@@ -181,16 +186,18 @@ func skip_current_presentation() -> void:
 		return
 
 	var skipped_action := _current_action
+
 	_presentation_id += 1
 	_presenting = false
+	_text_stage_skip_requested = false
 	_current_action = null
 
 	_stop_all_view_animation()
 	_stop_shake()
 	_sync_all_views()
+
 	presentation_skipped.emit(skipped_action)
 	call_deferred("_continue_resolution")
-
 
 func _on_action_resolved(
 	action: BattleAction
@@ -207,7 +214,6 @@ func _on_action_resolved(
 		_presentation_id
 	)
 
-
 func _present_action(
 	action: BattleAction,
 	presentation_id: int
@@ -217,13 +223,12 @@ func _present_action(
 	if not _is_current(presentation_id):
 		return
 
+	_text_stage_skip_requested = false
 	action_presentation_started.emit(action)
 
 	var actor_view: Object = _views.get(action.actor)
 	var target_view: Object = _find_target_view(action)
-	var target_position := (
-		_get_view_position(target_view)
-	)
+	var target_position := _get_view_position(target_view)
 	var anticipation := anticipation_duration
 
 	if (
@@ -236,9 +241,7 @@ func _present_action(
 		actor_view,
 		"play_anticipation",
 		[
-			_scaled_tween_duration(
-				anticipation
-			),
+			_scaled_tween_duration(anticipation),
 			reduced_motion
 		]
 	)
@@ -263,6 +266,12 @@ func _present_action(
 
 	if not await _wait(
 		travel_duration,
+		presentation_id
+	):
+		return
+
+	if not await _finish_text_stage(
+		anticipation + travel_duration,
 		presentation_id
 	):
 		return
@@ -297,7 +306,6 @@ func _present_action(
 		presentation_id
 	)
 
-
 func _present_effect(
 	result: BattleEffectResult,
 	actor_view: Object,
@@ -306,9 +314,11 @@ func _present_effect(
 	if result == null:
 		return true
 
+	_text_stage_skip_requested = false
 	effect_presentation_started.emit(result)
-	var target_view: Object = (
-		_views.get(result.target)
+
+	var target_view: Object = _views.get(
+		result.target
 	)
 
 	if result.skipped or result.missed:
@@ -317,6 +327,7 @@ func _present_effect(
 			if result.missed
 			else "NO EFFECT"
 		)
+
 		_call_view(
 			target_view,
 			"show_result_text",
@@ -326,7 +337,14 @@ func _present_effect(
 				reduced_motion
 			]
 		)
-		return await _wait(
+
+		if not await _wait(
+			result_duration,
+			presentation_id
+		):
+			return false
+
+		return await _finish_text_stage(
 			result_duration,
 			presentation_id
 		)
@@ -341,10 +359,19 @@ func _present_effect(
 				reduced_motion
 			]
 		)
-		return await _wait(
+
+		if not await _wait(
+			result_duration,
+			presentation_id
+		):
+			return false
+
+		return await _finish_text_stage(
 			result_duration,
 			presentation_id
 		)
+
+	var elapsed_duration := result_duration
 
 	match result.effect.effect_type:
 		AbilityEffectDefinition.EffectType.DAMAGE:
@@ -354,10 +381,13 @@ func _present_effect(
 			):
 				return false
 
+			elapsed_duration += hit_stop_duration
+
 			var direction := (
 				_get_view_position(target_view)
 				- _get_view_position(actor_view)
 			)
+
 			_call_view(
 				target_view,
 				"play_hit",
@@ -370,6 +400,7 @@ func _present_effect(
 					reduced_flashing
 				]
 			)
+
 			_call_view(
 				target_view,
 				"show_damage_number",
@@ -378,6 +409,7 @@ func _present_effect(
 					reduced_motion
 				]
 			)
+
 			_call_view(
 				target_view,
 				"animate_result",
@@ -388,21 +420,23 @@ func _present_effect(
 					)
 				]
 			)
+
 			_play_audio(
 				hit_sound,
 				_effect_audio
 			)
+
 			_play_audio(
 				hit_accent_sound,
 				_accent_audio
 			)
+
 			_play_shake(
 				direction,
 				result.amount
 			)
 
-		AbilityEffectDefinition.EffectType.HEAL, \
-		AbilityEffectDefinition.EffectType.REVIVE:
+		AbilityEffectDefinition.EffectType.HEAL, AbilityEffectDefinition.EffectType.REVIVE:
 			_call_view(
 				target_view,
 				"play_heal",
@@ -414,6 +448,7 @@ func _present_effect(
 					reduced_flashing
 				]
 			)
+
 			_call_view(
 				target_view,
 				"show_healing_number",
@@ -422,6 +457,7 @@ func _present_effect(
 					reduced_motion
 				]
 			)
+
 			_call_view(
 				target_view,
 				"animate_result",
@@ -432,6 +468,7 @@ func _present_effect(
 					)
 				]
 			)
+
 			_play_audio(
 				heal_sound,
 				_effect_audio
@@ -446,6 +483,7 @@ func _present_effect(
 					reduced_motion
 				]
 			)
+
 			_call_view(
 				target_view,
 				"animate_result",
@@ -469,6 +507,7 @@ func _present_effect(
 					reduced_flashing
 				]
 			)
+
 			_play_audio(
 				guard_sound,
 				_effect_audio
@@ -487,6 +526,7 @@ func _present_effect(
 						reduced_flashing
 					]
 				)
+
 				_call_view(
 					target_view,
 					"show_result_text",
@@ -496,6 +536,7 @@ func _present_effect(
 						reduced_motion
 					]
 				)
+
 				_play_audio(
 					interrupt_sound,
 					_effect_audio
@@ -547,8 +588,10 @@ func _present_effect(
 			target_view,
 			"pulse_tempo",
 			[
-				result.tempo_after
-					- result.tempo_before,
+				(
+					result.tempo_after
+					- result.tempo_before
+				),
 				_scaled_tween_duration(
 					result_duration
 				),
@@ -559,6 +602,12 @@ func _present_effect(
 
 	if not await _wait(
 		result_duration,
+		presentation_id
+	):
+		return false
+
+	if not await _finish_text_stage(
+		elapsed_duration,
 		presentation_id
 	):
 		return false
@@ -584,6 +633,7 @@ func _present_effect(
 	return true
 
 
+
 func _finish_presentation(
 	action: BattleAction,
 	presentation_id: int
@@ -592,9 +642,12 @@ func _finish_presentation(
 		return
 
 	_presenting = false
+	_text_stage_skip_requested = false
 	_current_action = null
+
 	_stop_shake()
 	_sync_all_views()
+
 	action_presentation_finished.emit(action)
 	call_deferred("_continue_resolution")
 
@@ -608,6 +661,9 @@ func _wait(
 	duration: float,
 	presentation_id: int
 ) -> bool:
+	if _text_stage_skip_requested:
+		return _is_current(presentation_id)
+
 	var remaining := maxf(duration, 0.0)
 
 	while remaining > 0.0:
@@ -615,6 +671,9 @@ func _wait(
 
 		if not _is_current(presentation_id):
 			return false
+
+		if _text_stage_skip_requested:
+			return true
 
 		var multiplier := animation_speed
 
@@ -628,6 +687,39 @@ func _wait(
 
 	return _is_current(presentation_id)
 
+func _finish_text_stage(
+	elapsed_duration: float,
+	presentation_id: int
+) -> bool:
+	if not _is_current(presentation_id):
+		return false
+
+	if _text_stage_skip_requested:
+		_text_stage_skip_requested = false
+		return true
+
+	var remaining := maxf(
+		text_stage_duration - elapsed_duration,
+		0.0
+	)
+
+	while remaining > 0.0:
+		await get_tree().process_frame
+
+		if not _is_current(presentation_id):
+			return false
+
+		if _text_stage_skip_requested:
+			_text_stage_skip_requested = false
+			return true
+
+		remaining -= (
+			get_process_delta_time()
+			* animation_speed
+		)
+
+	_text_stage_skip_requested = false
+	return _is_current(presentation_id)
 
 func _is_current(
 	presentation_id: int

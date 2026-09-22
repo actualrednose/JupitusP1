@@ -112,6 +112,8 @@ var _value_tweens: Array[Tween] = []
 var _idle_sway_tween: Tween
 var _icon_outline_material: ShaderMaterial
 var _selected_action: BattleAction
+var _is_active: bool = false
+var _keyboard_selected: bool = false
 
 
 func _ready() -> void:
@@ -133,13 +135,13 @@ func bind_combatant(value: CombatantState) -> void:
 
 
 func set_active(value: bool) -> void:
-	if not _built:
-		return
+	_is_active = value
+	_refresh_selection_outline()
 
-	_icon_outline_material.set_shader_parameter(
-		"outline_enabled",
-		value
-	)
+
+func set_keyboard_selected(value: bool) -> void:
+	_keyboard_selected = value
+	_refresh_selection_outline()
 
 
 func set_selected_action(action: BattleAction) -> void:
@@ -751,6 +753,19 @@ func _make_icon_outline_material() -> ShaderMaterial:
 	return outline_material
 
 
+func _refresh_selection_outline() -> void:
+	if (
+		not _built
+		or _icon_outline_material == null
+	):
+		return
+
+	_icon_outline_material.set_shader_parameter(
+		"outline_enabled",
+		_is_active or _keyboard_selected
+	)
+
+
 func _configure_bars() -> void:
 	_hp_bar.max_value = combatant.definition.max_hp
 	_hp_trail_bar.max_value = combatant.definition.max_hp
@@ -774,7 +789,10 @@ func _became_skill_ready(
 
 func _stop_value_tweens() -> void:
 	for tween in _value_tweens:
-		if tween != null and tween.is_valid():
+		if (
+			tween != null
+			and tween.is_valid()
+		):
 			tween.kill()
 
 	_value_tweens.clear()
@@ -856,11 +874,15 @@ func _refresh_state_label() -> void:
 		_state_label.visible = false
 
 
-func _on_gui_input(event: InputEvent) -> void:
+func _on_gui_input(
+	event: InputEvent
+) -> void:
 	if event is not InputEventMouseButton:
 		return
 
-	var mouse_event := event as InputEventMouseButton
+	var mouse_event := (
+		event as InputEventMouseButton
+	)
 
 	if (
 		mouse_event.button_index == MOUSE_BUTTON_LEFT
