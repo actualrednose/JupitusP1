@@ -37,6 +37,8 @@ enum TimingRequirement {
 @export_group("Timing")
 @export var timing_requirement: TimingRequirement = TimingRequirement.ANY
 @export var scales_with_timing: bool = false
+## Resolves this effect once for every successful timing-minigame input.
+@export var repeat_for_each_timing_success: bool = false
 
 @export_group("Damage")
 @export_range(0, 100) var target_tempo_gain_min: int = 0
@@ -54,7 +56,9 @@ func roll_value(rng: RandomNumberGenerator) -> int:
 	return rng.randi_range(minimum, maximum)
 
 
-func roll_target_tempo_gain(rng: RandomNumberGenerator) -> int:
+func roll_target_tempo_gain(
+	rng: RandomNumberGenerator
+) -> int:
 	var minimum := mini(
 		target_tempo_gain_min,
 		target_tempo_gain_max
@@ -66,21 +70,31 @@ func roll_target_tempo_gain(rng: RandomNumberGenerator) -> int:
 	return rng.randi_range(minimum, maximum)
 
 
-func meets_timing_requirement(timing_result: int) -> bool:
+func meets_timing_requirement(
+	timing_result: int
+) -> bool:
 	match timing_requirement:
 		TimingRequirement.ANY:
 			return true
 
 		TimingRequirement.HIT:
-			return timing_result != BattleAction.TimingResult.MISS
+			return (
+				timing_result
+				!= BattleAction.TimingResult.MISS
+			)
 
 		TimingRequirement.GOOD_OR_BETTER:
 			return (
-				timing_result == BattleAction.TimingResult.GOOD
-				or timing_result == BattleAction.TimingResult.PERFECT
+				timing_result
+					== BattleAction.TimingResult.GOOD
+				or timing_result
+					== BattleAction.TimingResult.PERFECT
 			)
 
 		TimingRequirement.PERFECT:
-			return timing_result == BattleAction.TimingResult.PERFECT
+			return (
+				timing_result
+				== BattleAction.TimingResult.PERFECT
+			)
 
 	return false

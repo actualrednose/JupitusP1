@@ -9,14 +9,12 @@ signal hover_ended(actor: BattleEnemyActor)
 @export var visual_node: NodePath = ^"Visual"
 @export var target_area: NodePath = ^"TargetArea"
 @export var power_attack_indicator: NodePath = ^"PowerAttackIndicator"
-
 ## Optional Label node used to show the selected action and intent category.
 ## If the path is empty or missing, a simple label is created automatically.
 @export var intent_label: NodePath = ^"IntentLabel"
 
 @export_group("Defeat")
 @export var hide_when_defeated: bool = false
-
 @export var defeated_modulate: Color = Color(
 	0.45,
 	0.45,
@@ -31,12 +29,20 @@ signal hover_ended(actor: BattleEnemyActor)
 ## Marker placed over the enemy's head for crosshair timing attacks.
 @export var timing_target: Marker2D
 
+@export_group("Damage State")
+## AnimatedSprite2D containing the enemy's normal and damaged animations.
+@export var damage_animation_sprite: NodePath = ^"Visual/AnimatedSprite2D"
+@export var normal_animation_name: StringName = &"default"
+@export var damaged_animation_name: StringName = &"damaged"
+
 var combatant: CombatantState = null
 var target_selection_enabled: bool = false
-
 var _base_scale: Vector2
 var _intent: EnemyActionIntent = null
 var _debug_intent_visible: bool = false
+var _mouse_hovered: bool = false
+var _keyboard_selected: bool = false
+var _damage_animation_sprite: AnimatedSprite2D
 var _feedback := BattleActorView.new()
 
 @onready var _visual: CanvasItem = (
@@ -48,9 +54,7 @@ var _feedback := BattleActorView.new()
 )
 
 @onready var _power_attack_indicator: CanvasItem = (
-	get_node_or_null(
-		power_attack_indicator
-	) as CanvasItem
+	get_node_or_null(power_attack_indicator) as CanvasItem
 )
 
 @onready var _intent_label: Label = (
@@ -59,10 +63,24 @@ var _feedback := BattleActorView.new()
 
 
 func _ready() -> void:
+	if timing_target == null:
+		timing_target = (
+			get_node_or_null(^"HeadTarget")
+			as Marker2D
+		)
+
+	if timing_target == null:
+		push_warning(
+			"BattleEnemyActor '%s' needs a HeadTarget Marker2D"
+			% name
+		)
+
 	_base_scale = scale
+	_damage_animation_sprite = (
+		_find_damage_animation_sprite()
+	)
 	_ensure_intent_label()
 	_refresh_intent_label()
-
 	_feedback.setup(
 		self,
 		_visual,
@@ -80,17 +98,14 @@ func _ready() -> void:
 	_target_area.input_pickable = (
 		target_selection_enabled
 	)
-
 	_target_area.collision_layer = 1
 
 	_target_area.input_event.connect(
 		_on_target_area_input_event
 	)
-
 	_target_area.mouse_entered.connect(
 		_on_target_area_mouse_entered
 	)
-
 	_target_area.mouse_exited.connect(
 		_on_target_area_mouse_exited
 	)
@@ -127,7 +142,22 @@ func set_target_selection_enabled(
 		_target_area.input_pickable = value
 
 	if not value:
-		scale = _base_scale
+		_mouse_hovered = false
+		_keyboard_selected = false
+
+	_refresh_selection_scale()
+
+
+func set_keyboard_selected(
+	value: bool
+) -> void:
+	_keyboard_selected = (
+		value
+		and target_selection_enabled
+		and combatant != null
+		and not combatant.is_defeated()
+	)
+	_refresh_selection_scale()
 
 
 func sync_from_state() -> void:
@@ -135,6 +165,7 @@ func sync_from_state() -> void:
 		return
 
 	_feedback.skip_and_reset()
+	_refresh_damage_animation()
 
 	if _power_attack_indicator:
 		_power_attack_indicator.visible = (
@@ -149,14 +180,60 @@ func sync_from_state() -> void:
 			_visual.visible = false
 		else:
 			_visual.visible = true
-			_visual.modulate = (
-				defeated_modulate
-			)
+			_visual.modulate = defeated_modulate
 	else:
 		_visual.visible = true
 		_visual.modulate = Color.WHITE
 
 	_feedback.recapture_base_modulate()
+
+
+func _find_damage_animation_sprite() -> AnimatedSprite2D:
+	var configured := (
+		get_node_or_null(damage_animation_sprite)
+		as AnimatedSprite2D
+	)
+
+	if configured != null:
+		return configured
+
+	var sprites_2d := find_children(
+		"*",
+		"AnimatedSprite2D",
+		true,
+		false
+	)
+
+	if not sprites_2d.is_empty():
+		return sprites_2d[0] as AnimatedSprite2D
+
+	return null
+
+
+func _refresh_damage_animation() -> void:
+	if _damage_animation_sprite == null:
+		return
+
+	var animation_name := (
+		damaged_animation_name
+		if combatant.is_damaged()
+		else normal_animation_name
+	)
+
+	if animation_name == &"":
+		return
+
+	if (
+		_damage_animation_sprite.sprite_frames != null
+		and _damage_animation_sprite.sprite_frames.has_animation(
+			animation_name
+		)
+		and _damage_animation_sprite.animation
+			!= animation_name
+	):
+		_damage_animation_sprite.play(
+			animation_name
+		)
 
 
 func _ensure_intent_label() -> void:
@@ -165,31 +242,25 @@ func _ensure_intent_label() -> void:
 
 	_intent_label = Label.new()
 	_intent_label.name = "IntentLabel"
-
 	_intent_label.position = Vector2(
 		-90.0,
 		-245.0
 	)
-
 	_intent_label.custom_minimum_size = Vector2(
 		180.0,
 		28.0
 	)
-
 	_intent_label.horizontal_alignment = (
 		HORIZONTAL_ALIGNMENT_CENTER
 	)
-
 	_intent_label.add_theme_font_size_override(
 		"font_size",
 		18
 	)
-
 	_intent_label.add_theme_color_override(
 		"font_color",
 		Color("#FFE49A")
 	)
-
 	add_child(_intent_label)
 
 
@@ -206,7 +277,6 @@ func _refresh_intent_label() -> void:
 		return
 
 	_intent_label.visible = true
-
 	_intent_label.text = "%s: %s" % [
 		_intent.get_category_name(),
 		_intent.display_text
@@ -363,10 +433,7 @@ func show_tempo_change(
 	amount: int,
 	reduced_motion: bool = false
 ) -> void:
-	var prefix := (
-		"+" if amount >= 0 else ""
-	)
-
+	var prefix := "+" if amount >= 0 else ""
 	_feedback.show_number(
 		"%s%d TEMPO" % [
 			prefix,
@@ -439,10 +506,28 @@ func _on_target_area_mouse_entered() -> void:
 	if not target_selection_enabled:
 		return
 
-	scale = _base_scale * hover_scale_multiplier
+	_mouse_hovered = true
+	_refresh_selection_scale()
 	hover_started.emit(self)
 
 
 func _on_target_area_mouse_exited() -> void:
-	scale = _base_scale
+	_mouse_hovered = false
+	_refresh_selection_scale()
 	hover_ended.emit(self)
+
+
+func _refresh_selection_scale() -> void:
+	if (
+		target_selection_enabled
+		and (
+			_mouse_hovered
+			or _keyboard_selected
+		)
+	):
+		scale = (
+			_base_scale
+			* hover_scale_multiplier
+		)
+	else:
+		scale = _base_scale

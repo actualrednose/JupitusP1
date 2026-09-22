@@ -11,6 +11,7 @@ enum Kind {
 enum TimingType {
 	NONE,
 	CROSSHAIR_HEAD,
+	DIRECTION_SEQUENCE,
 }
 
 @export_group("Identity")
@@ -30,9 +31,12 @@ enum TimingType {
 @export var action_priority: int = 0
 
 @export_group("Timing")
-## NONE resolves immediately. CROSSHAIR_HEAD pauses before the action and
-## asks the player to stop a horizontal crosshair over the target's head.
+## NONE resolves immediately.
+## CROSSHAIR_HEAD stops a horizontal crosshair over the target's head.
+## DIRECTION_SEQUENCE asks for a short sequence of directional inputs.
 @export var timing_type: TimingType = TimingType.NONE
+## Number of prompts used by sequence-based timing minigames.
+@export_range(1, 12) var timing_input_count: int = 3
 
 @export_group("Special Behavior")
 ## Used by enemy abilities that visibly prepare a dangerous attack.

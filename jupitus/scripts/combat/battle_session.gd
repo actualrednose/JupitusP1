@@ -294,7 +294,8 @@ func is_waiting_for_timing() -> bool:
 
 func submit_timing_result(
 	action: BattleAction,
-	timing_result: BattleAction.TimingResult
+	timing_result: BattleAction.TimingResult,
+	timing_success_count: int = 0
 ) -> bool:
 	if (
 		phase != Phase.RESOLVING
@@ -315,12 +316,19 @@ func submit_timing_result(
 		)
 		return false
 
+	if timing_success_count < 0:
+		push_error(
+			"BattleSession: timing success count cannot be negative"
+		)
+		return false
+
 	action.timing_result = timing_result
+	action.timing_success_count = (
+		timing_success_count
+	)
 	action.timing_completed = true
 	_awaiting_timing_action = null
-
 	call_deferred("_resolve_next_action")
-
 	return true
 
 
@@ -436,28 +444,44 @@ func _resolve_effects(
 					action.target
 				)
 			)
-
 			skipped_result.skipped = true
-
 			action.effect_results.append(
 				skipped_result
 			)
-
 			effect_resolved.emit(
 				skipped_result
 			)
-
 			continue
 
 		for target in targets:
-			var result := _apply_effect(
-				action,
-				effect,
-				target
-			)
+			var repetition_count := 1
 
-			action.effect_results.append(result)
-			effect_resolved.emit(result)
+			if (
+				effect
+					.repeat_for_each_timing_success
+			):
+				repetition_count = (
+					action.timing_success_count
+				)
+
+			for _repetition in range(
+				repetition_count
+			):
+				if not _can_receive_effect(
+					target,
+					effect
+				):
+					break
+
+				var result := _apply_effect(
+					action,
+					effect,
+					target
+				)
+				action.effect_results.append(
+					result
+				)
+				effect_resolved.emit(result)
 
 
 func _resolve_effect_targets(

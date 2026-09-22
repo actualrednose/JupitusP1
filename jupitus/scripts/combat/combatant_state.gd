@@ -33,9 +33,11 @@ func is_defeated() -> bool:
 	return current_hp <= 0
 
 
-func can_use_ability(
-	ability: AbilityDefinition
-) -> bool:
+func is_damaged() -> bool:
+	return current_hp * 2 < definition.max_hp
+
+
+func can_use_ability(ability: AbilityDefinition) -> bool:
 	if ability == null:
 		return false
 
@@ -74,13 +76,11 @@ func change_tempo(amount: int) -> int:
 		return 0
 
 	var previous_tempo := current_tempo
-
 	current_tempo = clampi(
 		current_tempo + amount,
 		0,
 		definition.max_tempo
 	)
-
 	return current_tempo - previous_tempo
 
 
@@ -126,12 +126,10 @@ func receive_healing(raw_amount: int) -> int:
 		return 0
 
 	var previous_hp := current_hp
-
 	current_hp = mini(
 		current_hp + maxi(raw_amount, 0),
 		definition.max_hp
 	)
-
 	return current_hp - previous_hp
 
 
@@ -143,7 +141,6 @@ func revive(raw_amount: int) -> int:
 		maxi(raw_amount, 1),
 		definition.max_hp
 	)
-
 	return current_hp
 
 
@@ -168,7 +165,6 @@ func apply_status(
 		var active_status: Dictionary = (
 			active_statuses[status_id]
 		)
-
 		active_status["turns_remaining"] = maxi(
 			int(active_status["turns_remaining"]),
 			duration
@@ -188,7 +184,6 @@ func apply_status(
 		"turns_remaining": duration,
 		"stacks": 1,
 	}
-
 	return true
 
 
@@ -203,7 +198,6 @@ func cleanse_statuses(
 
 	var removed_count := active_statuses.size()
 	active_statuses.clear()
-
 	return removed_count
 
 
@@ -218,7 +212,6 @@ func _tick_statuses() -> void:
 		var active_status: Dictionary = (
 			active_statuses[status_id]
 		)
-
 		active_status["turns_remaining"] = (
 			int(active_status["turns_remaining"]) - 1
 		)
@@ -250,7 +243,6 @@ func disrupt_power_attack() -> bool:
 	is_preparing_power_attack = false
 	power_attack_disrupted = true
 	pending_power_attack = null
-
 	return true
 
 

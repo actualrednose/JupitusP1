@@ -616,14 +616,16 @@ func set_presentation_fast_forwarding(
 
 func submit_timing_result(
 	action: BattleAction,
-	timing_result: BattleAction.TimingResult
+	timing_result: BattleAction.TimingResult,
+	timing_success_count: int = 0
 ) -> bool:
 	if battle_session == null:
 		return false
 
 	return battle_session.submit_timing_result(
 		action,
-		timing_result
+		timing_result,
+		timing_success_count
 	)
 
 

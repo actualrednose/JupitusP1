@@ -14,6 +14,7 @@ var target: CombatantState
 
 var timing_result: TimingResult = TimingResult.NONE
 var timing_completed: bool = false
+var timing_success_count: int = 0
 var cancelled: bool = false
 var effect_results: Array[BattleEffectResult] = []
 
@@ -36,10 +37,7 @@ func get_priority() -> int:
 
 
 func get_speed() -> int:
-	if (
-		actor == null
-		or actor.definition == null
-	):
+	if actor == null or actor.definition == null:
 		return 0
 
 	return actor.definition.speed

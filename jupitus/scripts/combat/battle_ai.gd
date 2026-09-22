@@ -19,7 +19,6 @@ static func choose_intent(
 		actor,
 		session
 	)
-
 	var usable_entries: Array[EnemyAIActionChance] = []
 	var targets: Dictionary = {}
 	var total_chance := 0.0
@@ -33,8 +32,11 @@ static func choose_intent(
 			continue
 
 		if (
-			entry.ability.kind != AbilityDefinition.Kind.GUARD
-			and not actor.can_use_ability(entry.ability)
+			entry.ability.kind
+				!= AbilityDefinition.Kind.GUARD
+			and not actor.can_use_ability(
+				entry.ability
+			)
 		):
 			continue
 
@@ -61,9 +63,7 @@ static func choose_intent(
 		0.0,
 		total_chance
 	)
-
 	var cumulative := 0.0
-
 	var selected_entry: EnemyAIActionChance = (
 		usable_entries.back()
 	)
@@ -114,30 +114,43 @@ static func _find_target(
 
 	if needs_enemy and needs_ally:
 		push_warning(
-			"BattleAI: '%s' mixes selected enemy "
-			+ "and selected ally effects"
+			"BattleAI: '%s' mixes selected enemy and selected ally effects"
 			% ability.display_name
 		)
-
 		return {
 			"valid": false,
-			"target": null,
+			"target": null
 		}
 
 	if needs_enemy:
+		var living_opponents: Array[CombatantState] = []
+
 		for opponent in _get_opponents(
 			actor,
 			session
 		):
 			if not opponent.is_defeated():
-				return {
-					"valid": true,
-					"target": opponent,
-				}
+				living_opponents.append(
+					opponent
+				)
 
+		if living_opponents.is_empty():
+			return {
+				"valid": false,
+				"target": null
+			}
+
+		var target_index := (
+			session.rng.randi_range(
+				0,
+				living_opponents.size() - 1
+			)
+		)
 		return {
-			"valid": false,
-			"target": null,
+			"valid": true,
+			"target": living_opponents[
+				target_index
+			]
 		}
 
 	if needs_ally:
@@ -151,12 +164,12 @@ static func _find_target(
 				if ally.is_defeated():
 					return {
 						"valid": true,
-						"target": ally,
+						"target": ally
 					}
 
 			return {
 				"valid": false,
-				"target": null,
+				"target": null
 			}
 
 		for ally in allies:
@@ -166,23 +179,23 @@ static func _find_target(
 			):
 				return {
 					"valid": true,
-					"target": ally,
+					"target": ally
 				}
 
 		if not actor.is_defeated():
 			return {
 				"valid": true,
-				"target": actor,
+				"target": actor
 			}
 
 		return {
 			"valid": false,
-			"target": null,
+			"target": null
 		}
 
 	return {
 		"valid": true,
-		"target": null,
+		"target": null
 	}
 
 
@@ -190,7 +203,10 @@ static func _get_allies(
 	actor: CombatantState,
 	session: BattleSession
 ) -> Array[CombatantState]:
-	if actor.team == CombatantState.Team.PLAYER:
+	if (
+		actor.team
+		== CombatantState.Team.PLAYER
+	):
 		return session.player_party
 
 	return session.enemies
@@ -200,7 +216,10 @@ static func _get_opponents(
 	actor: CombatantState,
 	session: BattleSession
 ) -> Array[CombatantState]:
-	if actor.team == CombatantState.Team.PLAYER:
+	if (
+		actor.team
+		== CombatantState.Team.PLAYER
+	):
 		return session.enemies
 
 	return session.player_party

@@ -5,6 +5,9 @@ class_name CombatantDefinition
 @export var combatant_id: StringName = &"combatant"
 @export var display_name: String = "Combatant"
 @export var icon: Texture2D = null
+## Optional portrait shown while this combatant is below half health.
+## Falls back to icon when left empty.
+@export var damaged_icon: Texture2D = null
 @export var is_player_character: bool = true
 
 @export_group("Base Stats")

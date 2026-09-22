@@ -9,60 +9,44 @@ signal presentation_skipped(action: BattleAction)
 @export_group("Timing")
 ## Overall presentation speed. Values above 1 make every stage faster.
 @export_range(0.25, 4.0, 0.05) var animation_speed: float = 1.0
-
 ## Time spent telegraphing an ordinary action before it moves toward its target.
 @export_range(0.0, 2.0, 0.01) var anticipation_duration: float = 0.18
-
 ## Additional anticipation for a power attack.
 @export_range(0.0, 2.0, 0.01) var power_attack_pause: float = 0.22
-
 ## Time used for an attacker lunge or projectile travel.
 @export_range(0.0, 2.0, 0.01) var travel_duration: float = 0.14
-
 ## Brief pause at contact before the target reacts.
 @export_range(0.0, 0.25, 0.01) var hit_stop_duration: float = 0.08
-
 ## Time used for hit, heal, guard, and interrupt reactions.
 @export_range(0.0, 2.0, 0.01) var result_duration: float = 0.28
-
 ## Time used for the attacker to return to its resting pose.
 @export_range(0.0, 2.0, 0.01) var recovery_duration: float = 0.16
-
 ## Multiplier applied while the player holds the fast-forward input.
 @export_range(1.0, 10.0, 0.25) var fast_forward_multiplier: float = 3.0
 
 @export_group("Accessibility")
 ## Disables lunges, recoil, floating-number movement, and camera shake.
 @export var reduced_motion: bool = false
-
 ## Disables bright hit, heal, guard, and interrupt flashes.
 @export var reduced_flashing: bool = false
-
 ## Strength of the small directional shake applied to the assigned stage.
 @export_range(0.0, 30.0, 0.5) var camera_shake_strength: float = 5.0
-
 ## Optional Node2D containing the battle actors. Leave empty to disable shake.
 @export var shake_target: Node2D
 
 @export_group("Optional Audio")
 ## Played when damage lands.
 @export var hit_sound: AudioStream
-
 ## Optional second impact layer played with the main hit sound.
 @export var hit_accent_sound: AudioStream
-
 ## Played when HP is restored.
 @export var heal_sound: AudioStream
-
 ## Played when guard is applied.
 @export var guard_sound: AudioStream
-
 ## Played when a prepared power attack is disrupted.
 @export var interrupt_sound: AudioStream
-
 ## Played during the extended anticipation of a power attack.
 @export var power_attack_charge_sound: AudioStream
-
 ## Disables all presentation audio without changing assigned resources.
 @export var mute_audio: bool = false
 
@@ -151,7 +135,6 @@ func present_power_attack_charge(
 	combatant: CombatantState
 ) -> void:
 	var view: Object = _views.get(combatant)
-
 	_call_view(
 		view,
 		"play_power_charge",
@@ -161,11 +144,36 @@ func present_power_attack_charge(
 			reduced_flashing
 		]
 	)
-
 	_play_audio(
 		power_attack_charge_sound,
 		_charge_audio
 	)
+
+
+func play_timing_impact_shake() -> void:
+	if (
+		shake_target == null
+		or reduced_motion
+		or camera_shake_strength <= 0.0
+	):
+		return
+
+	_stop_shake()
+	_shake_tween = create_tween()
+
+	for offset in [
+		Vector2(-1.0, 0.35),
+		Vector2(0.7, -0.25),
+		Vector2(-0.35, 0.1),
+		Vector2.ZERO
+	]:
+		_shake_tween.tween_property(
+			shake_target,
+			"position",
+			_shake_base_position
+				+ offset * camera_shake_strength,
+			_scaled_tween_duration(0.035)
+		)
 
 
 func skip_current_presentation() -> void:
@@ -173,7 +181,6 @@ func skip_current_presentation() -> void:
 		return
 
 	var skipped_action := _current_action
-
 	_presentation_id += 1
 	_presenting = false
 	_current_action = null
@@ -181,7 +188,6 @@ func skip_current_presentation() -> void:
 	_stop_all_view_animation()
 	_stop_shake()
 	_sync_all_views()
-
 	presentation_skipped.emit(skipped_action)
 	call_deferred("_continue_resolution")
 
@@ -196,7 +202,6 @@ func _on_action_resolved(
 	_presentation_id += 1
 	_presenting = true
 	_current_action = action
-
 	_present_action.call_deferred(
 		action,
 		_presentation_id
@@ -216,7 +221,9 @@ func _present_action(
 
 	var actor_view: Object = _views.get(action.actor)
 	var target_view: Object = _find_target_view(action)
-	var target_position := _get_view_position(target_view)
+	var target_position := (
+		_get_view_position(target_view)
+	)
 	var anticipation := anticipation_duration
 
 	if (
@@ -229,7 +236,9 @@ func _present_action(
 		actor_view,
 		"play_anticipation",
 		[
-			_scaled_tween_duration(anticipation),
+			_scaled_tween_duration(
+				anticipation
+			),
 			reduced_motion
 		]
 	)
@@ -298,9 +307,8 @@ func _present_effect(
 		return true
 
 	effect_presentation_started.emit(result)
-
-	var target_view: Object = _views.get(
-		result.target
+	var target_view: Object = (
+		_views.get(result.target)
 	)
 
 	if result.skipped or result.missed:
@@ -309,7 +317,6 @@ func _present_effect(
 			if result.missed
 			else "NO EFFECT"
 		)
-
 		_call_view(
 			target_view,
 			"show_result_text",
@@ -319,7 +326,6 @@ func _present_effect(
 				reduced_motion
 			]
 		)
-
 		return await _wait(
 			result_duration,
 			presentation_id
@@ -335,7 +341,6 @@ func _present_effect(
 				reduced_motion
 			]
 		)
-
 		return await _wait(
 			result_duration,
 			presentation_id
@@ -353,7 +358,6 @@ func _present_effect(
 				_get_view_position(target_view)
 				- _get_view_position(actor_view)
 			)
-
 			_call_view(
 				target_view,
 				"play_hit",
@@ -366,7 +370,6 @@ func _present_effect(
 					reduced_flashing
 				]
 			)
-
 			_call_view(
 				target_view,
 				"show_damage_number",
@@ -375,7 +378,6 @@ func _present_effect(
 					reduced_motion
 				]
 			)
-
 			_call_view(
 				target_view,
 				"animate_result",
@@ -386,23 +388,21 @@ func _present_effect(
 					)
 				]
 			)
-
 			_play_audio(
 				hit_sound,
 				_effect_audio
 			)
-
 			_play_audio(
 				hit_accent_sound,
 				_accent_audio
 			)
-
 			_play_shake(
 				direction,
 				result.amount
 			)
 
-		AbilityEffectDefinition.EffectType.HEAL, AbilityEffectDefinition.EffectType.REVIVE:
+		AbilityEffectDefinition.EffectType.HEAL, \
+		AbilityEffectDefinition.EffectType.REVIVE:
 			_call_view(
 				target_view,
 				"play_heal",
@@ -414,7 +414,6 @@ func _present_effect(
 					reduced_flashing
 				]
 			)
-
 			_call_view(
 				target_view,
 				"show_healing_number",
@@ -423,7 +422,6 @@ func _present_effect(
 					reduced_motion
 				]
 			)
-
 			_call_view(
 				target_view,
 				"animate_result",
@@ -434,7 +432,6 @@ func _present_effect(
 					)
 				]
 			)
-
 			_play_audio(
 				heal_sound,
 				_effect_audio
@@ -449,7 +446,6 @@ func _present_effect(
 					reduced_motion
 				]
 			)
-
 			_call_view(
 				target_view,
 				"animate_result",
@@ -473,7 +469,6 @@ func _present_effect(
 					reduced_flashing
 				]
 			)
-
 			_play_audio(
 				guard_sound,
 				_effect_audio
@@ -492,7 +487,6 @@ func _present_effect(
 						reduced_flashing
 					]
 				)
-
 				_call_view(
 					target_view,
 					"show_result_text",
@@ -502,7 +496,6 @@ func _present_effect(
 						reduced_motion
 					]
 				)
-
 				_play_audio(
 					interrupt_sound,
 					_effect_audio
@@ -554,10 +547,8 @@ func _present_effect(
 			target_view,
 			"pulse_tempo",
 			[
-				(
-					result.tempo_after
-					- result.tempo_before
-				),
+				result.tempo_after
+					- result.tempo_before,
 				_scaled_tween_duration(
 					result_duration
 				),
@@ -602,10 +593,8 @@ func _finish_presentation(
 
 	_presenting = false
 	_current_action = null
-
 	_stop_shake()
 	_sync_all_views()
-
 	action_presentation_finished.emit(action)
 	call_deferred("_continue_resolution")
 
@@ -677,9 +666,11 @@ func _get_view_position(
 			"get_presentation_position"
 		)
 	):
-		return view.call(
-			"get_presentation_position"
-		) as Vector2
+		return (
+			view.call(
+				"get_presentation_position"
+			) as Vector2
+		)
 
 	return Vector2.ZERO
 
@@ -689,7 +680,10 @@ func _call_view(
 	method: StringName,
 	arguments: Array
 ) -> void:
-	if view != null and view.has_method(method):
+	if (
+		view != null
+		and view.has_method(method)
+	):
 		view.callv(method, arguments)
 
 
@@ -723,14 +717,14 @@ func _play_shake(
 		return
 
 	_stop_shake()
-
 	var strength := minf(
 		camera_shake_strength
 			+ float(amount) * 0.08,
 		camera_shake_strength * 2.0
 	)
-
-	var shake_direction := -direction.normalized()
+	var shake_direction := (
+		-direction.normalized()
+	)
 
 	if shake_direction == Vector2.ZERO:
 		shake_direction = Vector2.RIGHT
@@ -746,12 +740,10 @@ func _play_shake(
 		_shake_tween.tween_property(
 			shake_target,
 			"position",
-			(
-				_shake_base_position
+			_shake_base_position
 				+ shake_direction
 				* strength
-				* multiplier
-			),
+				* multiplier,
 			_scaled_tween_duration(0.025)
 		)
 
@@ -793,4 +785,7 @@ func _scaled_tween_duration(
 	if _fast_forwarding:
 		multiplier *= fast_forward_multiplier
 
-	return duration / maxf(multiplier, 0.01)
+	return (
+		duration
+		/ maxf(multiplier, 0.01)
+	)
