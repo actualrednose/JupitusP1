@@ -11,6 +11,7 @@
 [ext_resource type="Resource" uid="uid://cgfsi4nf7tevr" path="res://resources/combat/mainparty/Roommate/RoommateCombatant.tres" id="6_qt72d"]
 [ext_resource type="Texture2D" uid="uid://chy84x4w3uaj2" path="res://resources/sprites/combat/Crosshair.png" id="9_65oax"]
 [ext_resource type="Script" uid="uid://c8ep73f7gl8kf" path="res://scripts/combat/battle_presentation_director.gd" id="9_inti1"]
+[ext_resource type="Script" uid="uid://7y2vfq3swtly" path="res://scripts/combat/battle_return.gd" id="12_01hog"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_01fuj"]
 animations = [{
@@ -99,3 +100,11 @@ emm_clean_shot_radius = 27.0
 
 [node name="BattlePresentationDirector" type="Node" parent="." unique_id=1475103282]
 script = ExtResource("9_inti1")
+text_stage_duration = 0.5
+
+[node name="BattleReturn" type="Node" parent="." unique_id=563756851]
+script = ExtResource("12_01hog")
+return_scene_path = "uid://do6usi0e6vdks"
+return_spawn_point = "from_battle"
+victory_flag = &"machine_cultist_defeated"
+metadata/_custom_type_script = "uid://7y2vfq3swtly"

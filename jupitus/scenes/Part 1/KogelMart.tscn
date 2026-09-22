@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://do6usi0e6vdks"]
 
+[ext_resource type="Script" uid="uid://djg0cok8u1i1v" path="res://scripts/systems/kogel_mart_progression.gd" id="1_8bpro"]
 [ext_resource type="Script" uid="uid://cscaqj7hdtdk2" path="res://scripts/camera/stage_camera.gd" id="1_rm8ds"]
 [ext_resource type="Texture2D" uid="uid://b3nnl17ouju5x" path="res://resources/sprites/environmental/kogelmart/floor.png" id="2_o8yeu"]
 [ext_resource type="Texture2D" uid="uid://b7xequfddljd6" path="res://resources/sprites/environmental/kogelmart/Skyline.png" id="3_rm8ds"]
@@ -9,21 +10,28 @@
 [ext_resource type="Texture2D" uid="uid://xrxug6k6ny1p" path="res://resources/sprites/environmental/kogelmart/ShelveSmall.png" id="5_28ksu"]
 [ext_resource type="Texture2D" uid="uid://bo7y5n5wpx1ij" path="res://resources/sprites/NPCs/KogelBotCashier.png" id="8_7dxde"]
 [ext_resource type="Script" uid="uid://d3a83b7v6ytes" path="res://scripts/actor/milk_interactable.gd" id="8_22vjl"]
-[ext_resource type="Script" uid="uid://2he41lgut73t" path="res://scripts/actor/npc.gd" id="8_x36dm"]
+[ext_resource type="Script" uid="uid://bxf0f2tcm3vx0" path="res://scripts/actor/battle_encounter_NPC.gd" id="8_vl3xx"]
 [ext_resource type="Resource" uid="uid://qnyta8131g65" path="res://resources/dialogue/kogelmart/milk_during_robbery.tres" id="9_gigyx"]
 [ext_resource type="Texture2D" uid="uid://cfd45865yhvyy" path="res://resources/sprites/environmental/kogelmart/MachineCultist.png" id="9_h7tew"]
 [ext_resource type="Resource" uid="uid://dx56x43eq0bsn" path="res://resources/dialogue/kogelmart/cultist_confrontation.tres" id="9_vl3xx"]
 [ext_resource type="Script" uid="uid://d1fculjemgye" path="res://scripts/cutscene/cutscene_player.gd" id="10_ng2d6"]
 [ext_resource type="Script" uid="uid://e4nee2wiehds" path="res://scripts/cutscene/cutscene_action.gd" id="11_v2hqh"]
 [ext_resource type="Script" uid="uid://bkmif1qkyfocw" path="res://scripts/dialogue/dialogue_line.gd" id="12_4xk5b"]
+[ext_resource type="Script" uid="uid://bsgrp7s87akno" path="res://scripts/actor/kogel_mart_clerk.gd" id="12_v8d1x"]
 [ext_resource type="Script" uid="uid://ddcy6t67u525" path="res://scripts/dialogue/dialogue_choice.gd" id="13_7dxde"]
+[ext_resource type="Resource" uid="uid://x3b4m0hs3xat" path="res://resources/dialogue/kogelmart/buying_milk.tres" id="13_8xwa7"]
+[ext_resource type="Resource" uid="uid://dl5jgpu6wsduk" path="res://resources/dialogue/kogelmart/kogelbot_post_robbery.tres" id="13_281g8"]
+[ext_resource type="Resource" uid="uid://cx34fii5iu131" path="res://resources/dialogue/kogelmart/buying_milk_repeat.tres" id="14_gwj8w"]
 [ext_resource type="Script" uid="uid://bnic7bnq1fb5c" path="res://scripts/dialogue/dialogue_data.gd" id="14_ykydi"]
 [ext_resource type="Script" uid="uid://deq5ipwsf8rv7" path="res://scripts/cutscene/cutscene_action_dialogue.gd" id="15_x36dm"]
 [ext_resource type="Script" uid="uid://c8nbywjgw0vm5" path="res://scripts/cutscene/cutscene_action_camera.gd" id="16_4xk5b"]
 [ext_resource type="Script" uid="uid://dawlns8gfr3sk" path="res://scripts/cutscene/cutscene_action_set_flag.gd" id="16_h7tew"]
+[ext_resource type="Resource" uid="uid://ch16yuh37cqql" path="res://resources/dialogue/kogelmart/milk_post_robbery.tres" id="17_1ti04"]
 [ext_resource type="Script" uid="uid://colgw8jbic88g" path="res://scripts/cutscene/cutscene_trigger.gd" id="17_v2hqh"]
 [ext_resource type="Resource" uid="uid://c6h3kp852qy08" path="res://resources/dialogue/characters/MachineCultist.tres" id="18_ups6i"]
 [ext_resource type="Resource" uid="uid://dg5kpnhdu8s77" path="res://resources/dialogue/characters/KogelBot.tres" id="19_vl3xx"]
+[ext_resource type="Resource" uid="uid://ijjru53jpo" path="res://resources/dialogue/kogelmart/cultist_after_battle.tres" id="25_q0lyd"]
+[ext_resource type="Script" uid="uid://vy77qyo6capm" path="res://scripts/cutscene/cutscene_action_move.gd" id="26_8bpro"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8xg12"]
 albedo_color = Color(0.16206557, 0.1620656, 0.16206557, 1)
@@ -165,13 +173,44 @@ metadata/_custom_type_script = "uid://c8nbywjgw0vm5"
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1eb1t"]
 
+[sub_resource type="Resource" id="Resource_wdspd"]
+script = ExtResource("16_4xk5b")
+target = NodePath("../MachineCultist")
+pan_duration = 0.6
+wait_duration = 0.1
+ease_type = 0
+metadata/_custom_type_script = "uid://c8nbywjgw0vm5"
+
+[sub_resource type="Resource" id="Resource_5kefk"]
+script = ExtResource("15_x36dm")
+dialogue = ExtResource("25_q0lyd")
+metadata/_custom_type_script = "uid://deq5ipwsf8rv7"
+
+[sub_resource type="Resource" id="Resource_281g8"]
+script = ExtResource("26_8bpro")
+actor = NodePath("../MachineCultist")
+destination = NodePath("CultistExit")
+ease_type = 0
+metadata/_custom_type_script = "uid://vy77qyo6capm"
+
+[sub_resource type="Resource" id="Resource_1ti04"]
+script = ExtResource("16_4xk5b")
+restore_to_player = true
+pan_duration = 0.6
+ease_type = 0
+metadata/_custom_type_script = "uid://c8nbywjgw0vm5"
+
 [node name="KogelMart" type="Node3D" unique_id=1560995785]
+script = ExtResource("1_8bpro")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=452366543]
 script = ExtResource("1_rm8ds")
 pitch_degrees = 15.0
 distance = 3.0
 follow_smoothing = 1.0
+
+[node name="from_battle" type="Marker3D" parent="." unique_id=2004211095 groups=["spawn_point"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.492744, 0, -0.8576603)
 
 [node name="Floor" type="StaticBody3D" parent="." unique_id=785142314]
 
@@ -367,7 +406,9 @@ mesh = SubResource("BoxMesh_aen8j")
 
 [node name="MachineCultist" type="Area3D" parent="." unique_id=1167547128]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.52129, 0.58930933, -1.9803706)
-script = ExtResource("8_x36dm")
+script = ExtResource("8_vl3xx")
+battle_scene_path = "uid://ddhos5d60nke6"
+battle_started_flag = &"machine_cultist_battle_started"
 npc_name = "MachineCultist"
 first_dialogue = ExtResource("9_vl3xx")
 prompt_text = "Press E (?)"
@@ -382,6 +423,14 @@ shape = SubResource("BoxShape3D_xufgy")
 
 [node name="KogelBotClerk" type="Area3D" parent="." unique_id=2085646925]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.52129, 0.58930933, -1.9803706)
+collision_layer = 2
+script = ExtResource("12_v8d1x")
+got_milk_dialogue = ExtResource("13_8xwa7")
+got_milk_repeat_dialogue = ExtResource("14_gwj8w")
+npc_name = "KogelBot"
+first_dialogue = ExtResource("13_281g8")
+prompt_text = "Press E to talk"
+enabled = false
 
 [node name="Sprite3D" type="Sprite3D" parent="KogelBotClerk" unique_id=19749913]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.22888494)
@@ -413,6 +462,7 @@ shape = SubResource("BoxShape3D_tbuv2")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.8677907, 0.30836225, 1.4469712)
 script = ExtResource("8_22vjl")
 robbery_dialogue = ExtResource("9_gigyx")
+after_robbery_dialogue = ExtResource("17_1ti04")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MilkInteractable" unique_id=1134998728]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.108947754, 0.02279663, 0.029132843)
@@ -433,3 +483,10 @@ cutscene_player = NodePath("..")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RobberyCutscene/Area3D" unique_id=920015894]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.262538, 0, -2.0273101)
 shape = SubResource("BoxShape3D_1eb1t")
+
+[node name="PostBattleCutscene" type="Node" parent="." unique_id=465737492]
+script = ExtResource("10_ng2d6")
+actions = Array[ExtResource("11_v2hqh")]([SubResource("Resource_wdspd"), SubResource("Resource_5kefk"), SubResource("Resource_281g8"), SubResource("Resource_1ti04")])
+
+[node name="CultistExit" type="Marker3D" parent="PostBattleCutscene" unique_id=71375267]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.2372794, 0.589, -2.2237577)

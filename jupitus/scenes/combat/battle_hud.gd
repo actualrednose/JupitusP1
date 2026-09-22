@@ -258,27 +258,34 @@ func _input(event: InputEvent) -> void:
 
 		return
 
-	if phase != BattleSession.Phase.RESOLVING:
-		return
-
-	var should_skip := event.is_action_pressed("ui_cancel")
+	var is_left_click := false
 
 	if event is InputEventMouseButton:
 		var mouse_event := event as InputEventMouseButton
-
-		if (
-			mouse_event.button_index == MOUSE_BUTTON_LEFT
+		is_left_click = (
+			mouse_event.button_index
+				== MOUSE_BUTTON_LEFT
 			and mouse_event.pressed
-		):
-			should_skip = true
+		)
 
-	if not should_skip:
+	if phase == BattleSession.Phase.TURN_COMPLETE:
+		if _is_confirm_event(event) or is_left_click:
+			battle_controller.advance_turn_complete_stage()
+			get_viewport().set_input_as_handled()
+
 		return
 
-	battle_controller.skip_action_presentation()
+	if phase != BattleSession.Phase.RESOLVING:
+		return
 
-	get_viewport().set_input_as_handled()
+	if _is_confirm_event(event) or is_left_click:
+		battle_controller.skip_presentation_text_stage()
+		get_viewport().set_input_as_handled()
+		return
 
+	if event.is_action_pressed("ui_cancel"):
+		battle_controller.skip_action_presentation()
+		get_viewport().set_input_as_handled()
 
 func _on_attack_pressed() -> void:
 	if not _is_command_selection_active():
@@ -441,11 +448,12 @@ func _on_phase_changed(
 		_hide_skill_menu()
 		status_label.text = (
 			"Resolving actions... "
-			+ "[Hold E to fast-forward; click or Esc to skip]"
 		)
 
 	elif new_phase == BattleSession.Phase.TURN_COMPLETE:
-		status_label.text = "Turn complete."
+		status_label.text = (
+			"Turn complete. "
+		)
 
 	_refresh()
 
@@ -618,11 +626,12 @@ func _show_presentation_message(message: String) -> void:
 	_display_presentation_message(message)
 
 
-func _display_presentation_message(message: String) -> void:
+func _display_presentation_message(
+	message: String
+) -> void:
 	status_label.text = (
-		"%s  [Hold E to fast-forward; click or Esc to skip]"
-		% message
-	)
+		"%s"
+	) % message
 
 
 func _on_action_cancelled(action: BattleAction) -> void:
@@ -702,10 +711,8 @@ func _on_action_presentation_finished(
 	_action: BattleAction
 ) -> void:
 	status_label.text = (
-		"Resolving actions... "
-		+ "[Hold E to fast-forward; click or Esc to skip]"
+		"."
 	)
-
 
 func _on_power_attack_started(
 	enemy: CombatantState
@@ -1098,15 +1105,19 @@ func _move_keyboard_selection(
 		if enemies.is_empty():
 			return
 
-		var current_index := enemies.find(
+		var enemy_current_index := enemies.find(
 			_keyboard_enemy
 		)
-		var next_index := _get_wrapped_index(
-			current_index,
+
+		var enemy_next_index := _get_wrapped_index(
+			enemy_current_index,
 			direction,
 			enemies.size()
 		)
-		_set_keyboard_enemy(enemies[next_index])
+
+		_set_keyboard_enemy(
+			enemies[enemy_next_index]
+		)
 		return
 
 	if selecting_ally_target:
@@ -1115,15 +1126,19 @@ func _move_keyboard_selection(
 		if allies.is_empty():
 			return
 
-		var current_index := allies.find(
+		var ally_current_index := allies.find(
 			_keyboard_ally
 		)
-		var next_index := _get_wrapped_index(
-			current_index,
+
+		var ally_next_index := _get_wrapped_index(
+			ally_current_index,
 			direction,
 			allies.size()
 		)
-		_set_keyboard_ally(allies[next_index])
+
+		_set_keyboard_ally(
+			allies[ally_next_index]
+		)
 		return
 
 	var buttons := _get_keyboard_buttons()
@@ -1134,13 +1149,18 @@ func _move_keyboard_selection(
 	var focus_owner := (
 		get_viewport().gui_get_focus_owner()
 	)
-	var current_index := buttons.find(focus_owner)
-	var next_index := _get_wrapped_index(
-		current_index,
+
+	var button_current_index := buttons.find(
+		focus_owner
+	)
+
+	var button_next_index := _get_wrapped_index(
+		button_current_index,
 		direction,
 		buttons.size()
 	)
-	buttons[next_index].grab_focus()
+
+	buttons[button_next_index].grab_focus()
 
 
 func _activate_keyboard_selection() -> void:
