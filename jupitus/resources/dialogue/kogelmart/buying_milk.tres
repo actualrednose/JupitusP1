@@ -1,0 +1,50 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3 uid="uid://x3b4m0hs3xat"]
+
+[ext_resource type="Script" uid="uid://bkmif1qkyfocw" path="res://scripts/dialogue/dialogue_line.gd" id="1_kheab"]
+[ext_resource type="Script" uid="uid://bnic7bnq1fb5c" path="res://scripts/dialogue/dialogue_data.gd" id="2_b8cmb"]
+[ext_resource type="Script" uid="uid://ddcy6t67u525" path="res://scripts/dialogue/dialogue_choice.gd" id="2_qqm5l"]
+[ext_resource type="Resource" uid="uid://dg5kpnhdu8s77" path="res://resources/dialogue/characters/KogelBot.tres" id="3_gsbi1"]
+[ext_resource type="Resource" uid="uid://byv0nuncpcc22" path="res://resources/dialogue/characters/Emm.tres" id="4_kcwhq"]
+
+[sub_resource type="Resource" id="Resource_3yn1h"]
+script = ExtResource("1_kheab")
+speaker = ExtResource("3_gsbi1")
+text = "[MILK DETECTED]
+[THAT WILL BE $10]"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_qqm5l"]
+script = ExtResource("1_kheab")
+speaker = ExtResource("4_kcwhq")
+text = "Sweet, let me just get-"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_gsbi1"]
+script = ExtResource("1_kheab")
+speaker = ExtResource("4_kcwhq")
+text = "Hang on. Milk was 2 credits last week."
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_kcwhq"]
+script = ExtResource("1_kheab")
+speaker = ExtResource("3_gsbi1")
+text = "[A BOMBING IN THE FARMING SECTOR HAS DISRUPTED SUPPLY] 
+[WOULD YOU LIKE ME TO EXPLAIN SUPPLY AND DEMAND?]"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_0k5ig"]
+script = ExtResource("1_kheab")
+speaker = ExtResource("4_kcwhq")
+text = "No thanks. Shit, we better go drum up some money."
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_wfkfw"]
+script = ExtResource("1_kheab")
+text = "NEW QUEST: MAKE TEN BUCKS!"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[resource]
+script = ExtResource("2_b8cmb")
+lines = Array[ExtResource("1_kheab")]([SubResource("Resource_3yn1h"), SubResource("Resource_qqm5l"), SubResource("Resource_gsbi1"), SubResource("Resource_kcwhq"), SubResource("Resource_0k5ig"), SubResource("Resource_wfkfw")])
+requires_flag = "got_milk"
+metadata/_custom_type_script = "uid://bnic7bnq1fb5c"

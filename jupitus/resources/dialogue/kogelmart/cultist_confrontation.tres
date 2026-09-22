@@ -41,4 +41,5 @@ metadata/_custom_type_script = "uid://bkmif1qkyfocw"
 [resource]
 script = ExtResource("2_p7287")
 lines = Array[ExtResource("1_418v8")]([SubResource("Resource_t4aar"), SubResource("Resource_bbss5"), SubResource("Resource_esrfq"), SubResource("Resource_j1jds"), SubResource("Resource_jmg03")])
+sets_flag_on_complete = "robbery_finished"
 metadata/_custom_type_script = "uid://bnic7bnq1fb5c"

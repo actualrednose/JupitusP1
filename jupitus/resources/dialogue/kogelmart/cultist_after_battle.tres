@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3 uid="uid://ijjru53jpo"]
+
+[ext_resource type="Script" uid="uid://bkmif1qkyfocw" path="res://scripts/dialogue/dialogue_line.gd" id="1_2bxyb"]
+[ext_resource type="Script" uid="uid://ddcy6t67u525" path="res://scripts/dialogue/dialogue_choice.gd" id="2_t1umn"]
+[ext_resource type="Script" uid="uid://bnic7bnq1fb5c" path="res://scripts/dialogue/dialogue_data.gd" id="2_w7bxg"]
+[ext_resource type="Resource" uid="uid://c6h3kp852qy08" path="res://resources/dialogue/characters/MachineCultist.tres" id="3_qkp36"]
+
+[sub_resource type="Resource" id="Resource_t1umn"]
+script = ExtResource("1_2bxyb")
+speaker = ExtResource("3_qkp36")
+text = "Eurgh! That's it!"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_y72bt"]
+script = ExtResource("1_2bxyb")
+speaker = ExtResource("3_qkp36")
+text = "You don't get it yet but you will! See you soon."
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[resource]
+script = ExtResource("2_w7bxg")
+lines = Array[ExtResource("1_2bxyb")]([SubResource("Resource_t1umn"), SubResource("Resource_y72bt")])
+metadata/_custom_type_script = "uid://bnic7bnq1fb5c"

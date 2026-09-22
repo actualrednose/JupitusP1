@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3 uid="uid://dl5jgpu6wsduk"]
+
+[ext_resource type="Script" uid="uid://bkmif1qkyfocw" path="res://scripts/dialogue/dialogue_line.gd" id="1_qs201"]
+[ext_resource type="Script" uid="uid://ddcy6t67u525" path="res://scripts/dialogue/dialogue_choice.gd" id="2_1hivx"]
+[ext_resource type="Script" uid="uid://bnic7bnq1fb5c" path="res://scripts/dialogue/dialogue_data.gd" id="2_pukwl"]
+[ext_resource type="Resource" uid="uid://dg5kpnhdu8s77" path="res://resources/dialogue/characters/KogelBot.tres" id="3_focmq"]
+[ext_resource type="Resource" uid="uid://byv0nuncpcc22" path="res://resources/dialogue/characters/Emm.tres" id="4_yrjmq"]
+
+[sub_resource type="Resource" id="Resource_yvuu8"]
+script = ExtResource("1_qs201")
+speaker = ExtResource("3_focmq")
+text = "[THREAT TO ECONOMIC STABILITY REMOVED]"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_1hivx"]
+script = ExtResource("1_qs201")
+speaker = ExtResource("3_focmq")
+text = "[CHECKOUT SERVICES RESTORED]"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_focmq"]
+script = ExtResource("1_qs201")
+speaker = ExtResource("4_yrjmq")
+text = "Yeah, whatever. You're welcome."
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[resource]
+script = ExtResource("2_pukwl")
+lines = Array[ExtResource("1_qs201")]([SubResource("Resource_yvuu8"), SubResource("Resource_1hivx"), SubResource("Resource_focmq")])
+metadata/_custom_type_script = "uid://bnic7bnq1fb5c"

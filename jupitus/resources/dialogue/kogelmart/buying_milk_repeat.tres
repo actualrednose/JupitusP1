@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3 uid="uid://cx34fii5iu131"]
+
+[ext_resource type="Script" uid="uid://bkmif1qkyfocw" path="res://scripts/dialogue/dialogue_line.gd" id="1_6oed0"]
+[ext_resource type="Script" uid="uid://ddcy6t67u525" path="res://scripts/dialogue/dialogue_choice.gd" id="2_h4jsn"]
+[ext_resource type="Script" uid="uid://bnic7bnq1fb5c" path="res://scripts/dialogue/dialogue_data.gd" id="2_mc0tr"]
+[ext_resource type="Resource" uid="uid://byv0nuncpcc22" path="res://resources/dialogue/characters/Emm.tres" id="3_e2ll1"]
+[ext_resource type="Resource" uid="uid://dg5kpnhdu8s77" path="res://resources/dialogue/characters/KogelBot.tres" id="4_jt2pi"]
+
+[sub_resource type="Resource" id="Resource_htcru"]
+script = ExtResource("1_6oed0")
+speaker = ExtResource("3_e2ll1")
+text = "Can't you just spot us for saving you?"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_h4jsn"]
+script = ExtResource("1_6oed0")
+speaker = ExtResource("4_jt2pi")
+text = "[THINKING...]"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_e2ll1"]
+script = ExtResource("1_6oed0")
+speaker = ExtResource("4_jt2pi")
+text = "[THINKING...]"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_jt2pi"]
+script = ExtResource("1_6oed0")
+speaker = ExtResource("4_jt2pi")
+text = "[THOUGHT COMPLETE:]
+
+[NO]"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[resource]
+script = ExtResource("2_mc0tr")
+lines = Array[ExtResource("1_6oed0")]([SubResource("Resource_htcru"), SubResource("Resource_h4jsn"), SubResource("Resource_e2ll1"), SubResource("Resource_jt2pi")])
+requires_flag = "got_milk"
+metadata/_custom_type_script = "uid://bnic7bnq1fb5c"

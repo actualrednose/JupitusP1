@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="DialogueData" format=3 uid="uid://ch16yuh37cqql"]
+
+[ext_resource type="Script" uid="uid://bkmif1qkyfocw" path="res://scripts/dialogue/dialogue_line.gd" id="1_ijb3a"]
+[ext_resource type="Script" uid="uid://ddcy6t67u525" path="res://scripts/dialogue/dialogue_choice.gd" id="2_5508p"]
+[ext_resource type="Script" uid="uid://bnic7bnq1fb5c" path="res://scripts/dialogue/dialogue_data.gd" id="2_lrwb1"]
+[ext_resource type="Resource" uid="uid://byv0nuncpcc22" path="res://resources/dialogue/characters/Emm.tres" id="3_g3t1e"]
+[ext_resource type="Resource" uid="uid://detderr3pns4m" path="res://resources/dialogue/characters/Roommate.tres" id="4_r2vhw"]
+
+[sub_resource type="Resource" id="Resource_h4bfa"]
+script = ExtResource("1_ijb3a")
+speaker = ExtResource("3_g3t1e")
+text = "Finally. Let's get this and go home."
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[sub_resource type="Resource" id="Resource_5508p"]
+script = ExtResource("1_ijb3a")
+speaker = ExtResource("4_r2vhw")
+text = "*The Roommate nods in agreement*"
+metadata/_custom_type_script = "uid://bkmif1qkyfocw"
+
+[resource]
+script = ExtResource("2_lrwb1")
+lines = Array[ExtResource("1_ijb3a")]([SubResource("Resource_h4bfa"), SubResource("Resource_5508p")])
+sets_flag_on_complete = "got_milk"
+metadata/_custom_type_script = "uid://bnic7bnq1fb5c"
