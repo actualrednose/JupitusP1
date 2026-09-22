@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://ddhos5d60nke6"]
 
 [ext_resource type="PackedScene" uid="uid://3nclj0ld5ntj" path="res://scenes/combat/battle_hud.tscn" id="1_1yf7f"]
+[ext_resource type="Texture2D" uid="uid://51l44mfe4vaw" path="res://resources/combat/mainparty/Emm/EmmHeadHurt.png" id="2_1j5hw"]
 [ext_resource type="Script" uid="uid://c0mdjukebrc5f" path="res://scripts/combat/battle_controller.gd" id="2_c6bvs"]
 [ext_resource type="Script" uid="uid://1d82jwvuc7el" path="res://scripts/combat/combatant_definition.gd" id="2_furec"]
 [ext_resource type="Texture2D" uid="uid://ca7xi72nemui2" path="res://resources/combat/enemy/MachineCultist/joeBadguy.png" id="2_jlq6r"]
@@ -13,6 +14,14 @@
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_01fuj"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_1j5hw")
+}],
+"loop": 1,
+"name": &"damaged",
+"speed": 5.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("2_jlq6r")
@@ -60,6 +69,7 @@ position = Vector2(-4, -110)
 
 [node name="AnimatedSprite3D" type="AnimatedSprite2D" parent="EnemyActors/CultistActor/Visual" unique_id=1642558682]
 sprite_frames = SubResource("SpriteFrames_01fuj")
+animation = &"damaged"
 
 [node name="TargetArea" type="Area2D" parent="EnemyActors/CultistActor" unique_id=500788714]
 
@@ -73,11 +83,12 @@ position = Vector2(0, -201)
 scale = Vector2(0.5, 0.5)
 texture = SubResource("CompressedTexture2D_jlq6r")
 
-[node name="BattleController" type="Node" parent="." unique_id=1347460764 node_paths=PackedStringArray("enemy_actors")]
+[node name="BattleController" type="Node" parent="." unique_id=1347460764 node_paths=PackedStringArray("enemy_actors", "presentation_director")]
 script = ExtResource("2_c6bvs")
 player_definitions = Array[ExtResource("2_furec")]([ExtResource("3_jn58a"), ExtResource("6_qt72d")])
 enemy_definitions = Array[ExtResource("2_furec")]([ExtResource("4_jn58a")])
 enemy_actors = [NodePath("../EnemyActors/CultistActor")]
+presentation_director = NodePath("../BattlePresentationDirector")
 
 [node name="BattleHUD" parent="." unique_id=601674235 node_paths=PackedStringArray("battle_controller") instance=ExtResource("1_1yf7f")]
 battle_controller = NodePath("../BattleController")

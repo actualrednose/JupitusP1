@@ -6,7 +6,7 @@
 [sub_resource type="Resource" id="Resource_6nap5"]
 script = ExtResource("1_pk3nx")
 value_min = 10
-value_max = 10
+value_max = 30
 target_tempo_gain_min = 5
 target_tempo_gain_max = 10
 metadata/_custom_type_script = "uid://vfs2amss751j"

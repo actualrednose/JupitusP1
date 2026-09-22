@@ -6,7 +6,7 @@
 [sub_resource type="Resource" id="Resource_qt72d"]
 script = ExtResource("1_arkom")
 value_min = 10
-value_max = 20
+value_max = 30
 timing_requirement = 1
 scales_with_timing = true
 metadata/_custom_type_script = "uid://vfs2amss751j"

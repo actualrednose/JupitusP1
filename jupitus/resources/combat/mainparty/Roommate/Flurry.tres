@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="AbilityDefinition" format=3 uid="uid://qudxv7vjr2dw"]
+
+[ext_resource type="Script" uid="uid://vfs2amss751j" path="res://scripts/combat/ability_effect_definition.gd" id="1_dx8ly"]
+[ext_resource type="Script" uid="uid://c6203othnxyij" path="res://scripts/combat/ability_definition.gd" id="2_btwya"]
+
+[sub_resource type="Resource" id="Resource_7a7pq"]
+script = ExtResource("1_dx8ly")
+value_min = 10
+value_max = 20
+repeat_for_each_timing_success = true
+target_tempo_gain_min = 5
+target_tempo_gain_max = 10
+metadata/_custom_type_script = "uid://vfs2amss751j"
+
+[sub_resource type="Resource" id="Resource_3k6vx"]
+script = ExtResource("1_dx8ly")
+effect_type = 2
+target_type = 2
+value_min = 5
+value_max = 10
+metadata/_custom_type_script = "uid://vfs2amss751j"
+
+[resource]
+script = ExtResource("2_btwya")
+display_name = "flurry"
+action_verb = "laid a beatdown on"
+tempo_cost = 30
+effects = Array[ExtResource("1_dx8ly")]([SubResource("Resource_7a7pq"), SubResource("Resource_3k6vx")])
+timing_type = 2
+timing_input_count = 6
+metadata/_custom_type_script = "uid://c6203othnxyij"

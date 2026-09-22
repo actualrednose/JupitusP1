@@ -5,8 +5,10 @@
 
 [sub_resource type="Resource" id="Resource_s2r4l"]
 script = ExtResource("1_26ik1")
-value_min = 10
-value_max = 20
+value_min = 5
+value_max = 10
+scales_with_timing = true
+repeat_for_each_timing_success = true
 target_tempo_gain_min = 5
 target_tempo_gain_max = 10
 metadata/_custom_type_script = "uid://vfs2amss751j"
@@ -24,4 +26,5 @@ script = ExtResource("2_jv4t1")
 display_name = "Attack"
 kind = 0
 effects = Array[ExtResource("1_26ik1")]([SubResource("Resource_s2r4l"), SubResource("Resource_4pa44")])
+timing_type = 2
 metadata/_custom_type_script = "uid://c6203othnxyij"

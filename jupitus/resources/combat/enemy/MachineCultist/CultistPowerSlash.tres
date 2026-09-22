@@ -5,8 +5,8 @@
 
 [sub_resource type="Resource" id="Resource_xrx15"]
 script = ExtResource("1_teo1j")
-value_min = 20
-value_max = 30
+value_min = 40
+value_max = 60
 target_tempo_gain_min = 5
 target_tempo_gain_max = 10
 metadata/_custom_type_script = "uid://vfs2amss751j"

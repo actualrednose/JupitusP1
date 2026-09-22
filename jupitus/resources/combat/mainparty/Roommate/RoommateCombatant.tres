@@ -1,18 +1,23 @@
 [gd_resource type="Resource" script_class="CombatantDefinition" format=3 uid="uid://cgfsi4nf7tevr"]
 
+[ext_resource type="Texture2D" uid="uid://bckri4qhivxxk" path="res://resources/combat/mainparty/Roommate/RoommateHeadHurt.png" id="1_1hbi1"]
 [ext_resource type="Resource" uid="uid://dmdwov5faitb3" path="res://resources/combat/mainparty/Guard.tres" id="1_2j1cu"]
 [ext_resource type="Script" uid="uid://1d82jwvuc7el" path="res://scripts/combat/combatant_definition.gd" id="1_rs3e3"]
-[ext_resource type="Texture2D" uid="uid://de6kri33m8e8d" path="res://icon.svg" id="2_06rbf"]
+[ext_resource type="Texture2D" uid="uid://dkhhhlfv68k7u" path="res://resources/combat/mainparty/Roommate/RoommateHead.png" id="2_id7sn"]
 [ext_resource type="Script" uid="uid://c6203othnxyij" path="res://scripts/combat/ability_definition.gd" id="2_jo85w"]
 [ext_resource type="Resource" uid="uid://6yvnl2t6jodm" path="res://resources/combat/mainparty/Roommate/RoommateMainAttack.tres" id="3_2j1cu"]
+[ext_resource type="Resource" uid="uid://bjfxqkqnlwnaj" path="res://resources/combat/mainparty/Roommate/ScreenAlly.tres" id="6_06rbf"]
+[ext_resource type="Resource" uid="uid://qudxv7vjr2dw" path="res://resources/combat/mainparty/Roommate/Flurry.tres" id="7_id7sn"]
 
 [resource]
 script = ExtResource("1_rs3e3")
 combatant_id = &"roommate"
 display_name = "The Roommate"
-icon = ExtResource("2_06rbf")
+icon = ExtResource("2_id7sn")
+damaged_icon = ExtResource("1_1hbi1")
 max_hp = 120
 speed = 5
 main_attack = ExtResource("3_2j1cu")
+skills = Array[ExtResource("2_jo85w")]([ExtResource("6_06rbf"), ExtResource("7_id7sn")])
 guard_ability = ExtResource("1_2j1cu")
 metadata/_custom_type_script = "uid://1d82jwvuc7el"

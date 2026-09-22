@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="AbilityDefinition" format=3 uid="uid://bjfxqkqnlwnaj"]
+
+[ext_resource type="Script" uid="uid://vfs2amss751j" path="res://scripts/combat/ability_effect_definition.gd" id="1_sdlfh"]
+[ext_resource type="Script" uid="uid://c6203othnxyij" path="res://scripts/combat/ability_definition.gd" id="2_skpfu"]
+
+[sub_resource type="Resource" id="Resource_3uvdi"]
+script = ExtResource("1_sdlfh")
+effect_type = 3
+target_type = 1
+metadata/_custom_type_script = "uid://vfs2amss751j"
+
+[resource]
+script = ExtResource("2_skpfu")
+display_name = "Screen Ally"
+action_verb = "screened"
+effects = Array[ExtResource("1_sdlfh")]([SubResource("Resource_3uvdi")])
+action_priority = 99
+metadata/_custom_type_script = "uid://c6203othnxyij"
