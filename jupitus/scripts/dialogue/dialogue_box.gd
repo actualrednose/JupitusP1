@@ -383,16 +383,20 @@ func _play_current_line() -> void:
 
 
 func _advance_or_skip() -> void:
-		if _typing:
-				# Typewriter is still going — skip to full text
-				_kill_typewriter()
-				_text_label.visible_characters = -1  # -1 = show all
-				_typing = false
-				_on_typewriter_finished()
-		else:
-				# Line is fully displayed — advance
-				_advance_line()
+	# The box becomes active before its opening tween finishes. Ignore
+	# advance presses during that brief window, before a line is assigned.
+	if _current_line == null:
+		return
 
+	if _typing:
+		# Typewriter is still going — skip to full text.
+		_kill_typewriter()
+		_text_label.visible_characters = -1
+		_typing = false
+		_on_typewriter_finished()
+	else:
+		# Line is fully displayed — advance.
+		_advance_line()
 
 func _advance_line() -> void:
 		line_advanced.emit(_current_line_index)

@@ -1,6 +1,7 @@
 extends RefCounted
 class_name BattleSession
 
+
 enum Phase {
 	IDLE,
 	COMMAND_SELECTION,
@@ -10,6 +11,7 @@ enum Phase {
 	DEFEAT,
 }
 
+
 signal phase_changed(new_phase: Phase)
 signal action_queued(action: BattleAction)
 signal timing_requested(action: BattleAction)
@@ -17,20 +19,24 @@ signal action_started(action: BattleAction)
 signal action_resolved(action: BattleAction)
 signal action_cancelled(action: BattleAction)
 signal effect_resolved(result: BattleEffectResult)
+
 signal damage_applied(
 	action: BattleAction,
 	target: CombatantState,
 	amount: int
 )
+
 signal healing_applied(
 	action: BattleAction,
 	target: CombatantState,
 	amount: int
 )
+
 signal power_attack_started(enemy: CombatantState)
 signal power_attack_disrupted(enemy: CombatantState)
 signal battle_won()
 signal battle_lost()
+
 
 var phase: Phase = Phase.IDLE
 
@@ -114,7 +120,8 @@ func queue_action(
 ) -> BattleAction:
 	if phase != Phase.COMMAND_SELECTION:
 		push_warning(
-			"BattleSession: actions can only be queued during command selection"
+			"BattleSession: actions can only be queued during "
+			+ "command selection"
 		)
 		return null
 
@@ -305,10 +312,8 @@ func submit_timing_result(
 		return false
 
 	if (
-		timing_result
-			< BattleAction.TimingResult.NONE
-		or timing_result
-			> BattleAction.TimingResult.PERFECT
+		timing_result < BattleAction.TimingResult.NONE
+		or timing_result > BattleAction.TimingResult.PERFECT
 	):
 		push_error(
 			"BattleSession: invalid timing result %d"
@@ -323,11 +328,10 @@ func submit_timing_result(
 		return false
 
 	action.timing_result = timing_result
-	action.timing_success_count = (
-		timing_success_count
-	)
+	action.timing_success_count = timing_success_count
 	action.timing_completed = true
 	_awaiting_timing_action = null
+
 	call_deferred("_resolve_next_action")
 	return true
 
@@ -390,8 +394,7 @@ func resolve_action(
 	):
 		return false
 
-	# A perfect regular attack may have disrupted this
-	# action before it began.
+	# A perfect regular attack may have disrupted this action before it began.
 	if (
 		action.ability.is_power_attack
 		and action.actor.power_attack_disrupted
@@ -416,7 +419,6 @@ func resolve_action(
 		action.actor.finish_power_attack()
 
 	action_resolved.emit(action)
-
 	return true
 
 
@@ -437,51 +439,33 @@ func _resolve_effects(
 		)
 
 		if targets.is_empty():
-			var skipped_result := (
-				BattleEffectResult.new(
-					action,
-					effect,
-					action.target
-				)
+			var skipped_result := BattleEffectResult.new(
+				action,
+				effect,
+				action.target
 			)
+
 			skipped_result.skipped = true
+
 			action.effect_results.append(
 				skipped_result
 			)
+
 			effect_resolved.emit(
 				skipped_result
 			)
+
 			continue
 
 		for target in targets:
-			var repetition_count := 1
+			var result := _apply_effect(
+				action,
+				effect,
+				target
+			)
 
-			if (
-				effect
-					.repeat_for_each_timing_success
-			):
-				repetition_count = (
-					action.timing_success_count
-				)
-
-			for _repetition in range(
-				repetition_count
-			):
-				if not _can_receive_effect(
-					target,
-					effect
-				):
-					break
-
-				var result := _apply_effect(
-					action,
-					effect,
-					target
-				)
-				action.effect_results.append(
-					result
-				)
-				effect_resolved.emit(result)
+			action.effect_results.append(result)
+			effect_resolved.emit(result)
 
 
 func _resolve_effect_targets(
@@ -586,8 +570,7 @@ func _apply_effect(
 
 	if (
 		effect.application_chance < 1.0
-		and rng.randf()
-			>= effect.application_chance
+		and rng.randf() >= effect.application_chance
 	):
 		result.skipped = true
 		return result
@@ -625,8 +608,8 @@ func _apply_effect(
 			)
 
 		AbilityEffectDefinition.EffectType.HEAL:
-			result.amount = (
-				target.receive_healing(value)
+			result.amount = target.receive_healing(
+				value
 			)
 
 			result.applied = result.amount > 0
@@ -650,29 +633,20 @@ func _apply_effect(
 			result.applied = true
 
 		AbilityEffectDefinition.EffectType.APPLY_STATUS:
-			result.status_applied = (
-				target.apply_status(
-					effect.status,
-					effect.status_duration_override
-				)
+			result.status_applied = target.apply_status(
+				effect.status,
+				effect.status_duration_override
 			)
 
 			result.applied = result.status_applied
 
 		AbilityEffectDefinition.EffectType.CLEANSE:
-			result.statuses_removed = (
-				target.cleanse_statuses(
-					effect.status
-				)
+			result.statuses_removed = target.cleanse_statuses(
+				effect.status
 			)
 
-			result.amount = (
-				result.statuses_removed
-			)
-
-			result.applied = (
-				result.statuses_removed > 0
-			)
+			result.amount = result.statuses_removed
+			result.applied = result.statuses_removed > 0
 
 		AbilityEffectDefinition.EffectType.REVIVE:
 			result.amount = target.revive(
@@ -684,10 +658,7 @@ func _apply_effect(
 
 		AbilityEffectDefinition.EffectType.STAGGER:
 			if value > 0:
-				result.disrupted = (
-					target.disrupt_power_attack()
-				)
-
+				result.disrupted = target.disrupt_power_attack()
 				result.applied = result.disrupted
 
 				if result.disrupted:

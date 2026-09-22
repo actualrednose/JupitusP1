@@ -1,12 +1,16 @@
 extends Node
 class_name BattleController
 
+
 @export_group("Battle Setup")
+
 @export var player_definitions: Array[CombatantDefinition] = []
 @export var enemy_definitions: Array[CombatantDefinition] = []
 @export var auto_start: bool = true
 
+
 @export_group("Debug Input")
+
 @export var attack_action: StringName = &"interact"
 @export var guard_action: StringName = &"ui_cancel"
 @export var resolve_action: StringName = &"ui_accept"
@@ -19,11 +23,14 @@ class_name BattleController
 		if is_inside_tree():
 			_set_enemy_intent_debug_visibility()
 
+
 @export_group("Battle Actors")
+
 @export var enemy_actors: Array[BattleEnemyActor] = []
 
 ## Optional presentation director. One is created automatically when unassigned.
 @export var presentation_director: BattlePresentationDirector
+
 
 signal player_action_changed(action: BattleAction)
 signal active_player_changed(player: CombatantState)
@@ -33,6 +40,7 @@ signal timing_requested(
 	action: BattleAction,
 	target_position: Vector2
 )
+
 
 var battle_session: BattleSession
 var selected_player_action: BattleAction = null
@@ -105,9 +113,7 @@ func _ready() -> void:
 		battle_session.start_turn()
 
 
-func _unhandled_input(
-	event: InputEvent
-) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if battle_session == null:
 		return
 
@@ -170,11 +176,9 @@ func _queue_enemy_actions() -> void:
 			)
 			continue
 
-		var table_name := (
-			profile.get_matching_table_name(
-				enemy,
-				battle_session
-			)
+		var table_name := profile.get_matching_table_name(
+			enemy,
+			battle_session
 		)
 
 		if table_name == "Base actions":
@@ -250,23 +254,18 @@ func _on_phase_changed(
 		% BattleSession.Phase.keys()[new_phase]
 	)
 
-	if (
-		new_phase
-		== BattleSession.Phase.COMMAND_SELECTION
-	):
+	if new_phase == BattleSession.Phase.COMMAND_SELECTION:
 		selected_player_action = null
 		selected_player_actions.clear()
 		enemy_intents.clear()
 		_clear_enemy_actor_intents()
 
 		enemy_actions_queued = false
+
 		_queue_enemy_actions()
 		_advance_active_player()
 
-	elif (
-		new_phase
-		== BattleSession.Phase.TURN_COMPLETE
-	):
+	elif new_phase == BattleSession.Phase.TURN_COMPLETE:
 		call_deferred("_start_next_turn")
 
 
@@ -293,10 +292,7 @@ func _on_action_started(
 		]
 	)
 
-	if (
-		action.actor.team
-		== CombatantState.Team.ENEMY
-	):
+	if action.actor.team == CombatantState.Team.ENEMY:
 		enemy_intents.erase(action.actor)
 
 		_set_enemy_actor_intent(
@@ -325,10 +321,7 @@ func _on_action_cancelled(
 		]
 	)
 
-	if (
-		action.actor.team
-		== CombatantState.Team.ENEMY
-	):
+	if action.actor.team == CombatantState.Team.ENEMY:
 		enemy_intents.erase(action.actor)
 
 		_set_enemy_actor_intent(
@@ -338,7 +331,7 @@ func _on_action_cancelled(
 
 
 func _on_damage_applied(
-	action: BattleAction,
+	_action: BattleAction,
 	target: CombatantState,
 	amount: int
 ) -> void:
@@ -649,9 +642,7 @@ func _advance_active_player() -> void:
 	for player in battle_session.player_party:
 		if (
 			not player.is_defeated()
-			and not selected_player_actions.has(
-				player
-			)
+			and not selected_player_actions.has(player)
 		):
 			next_player = player
 			break
@@ -661,10 +652,7 @@ func _advance_active_player() -> void:
 
 
 func _start_next_turn() -> void:
-	if (
-		battle_session.phase
-		== BattleSession.Phase.TURN_COMPLETE
-	):
+	if battle_session.phase == BattleSession.Phase.TURN_COMPLETE:
 		battle_session.start_turn()
 
 
@@ -737,26 +725,24 @@ func _bind_enemy_actors() -> void:
 		battle_session.enemies.size()
 	)
 
-	for i in range(count):
-		enemy_actors[i].bind_combatant(
-			battle_session.enemies[i]
+	for index in range(count):
+		enemy_actors[index].bind_combatant(
+			battle_session.enemies[index]
 		)
 
 		presentation_director.register_view(
-			battle_session.enemies[i],
-			enemy_actors[i]
+			battle_session.enemies[index],
+			enemy_actors[index]
 		)
 
-		enemy_actors[i].set_debug_intent_visible(
+		enemy_actors[index].set_debug_intent_visible(
 			debug_show_enemy_intents
 		)
 
-	if (
-		enemy_actors.size()
-		!= battle_session.enemies.size()
-	):
+	if enemy_actors.size() != battle_session.enemies.size():
 		push_warning(
-			"BattleController: enemy actor count does not match enemy combatant count"
+			"BattleController: enemy actor count does not match "
+			+ "enemy combatant count"
 		)
 
 
@@ -797,12 +783,7 @@ func _ensure_presentation_director() -> void:
 	if presentation_director != null:
 		return
 
-	presentation_director = (
-		BattlePresentationDirector.new()
-	)
-
-	presentation_director.name = (
-		"BattlePresentationDirector"
-	)
+	presentation_director = BattlePresentationDirector.new()
+	presentation_director.name = "BattlePresentationDirector"
 
 	add_child(presentation_director)

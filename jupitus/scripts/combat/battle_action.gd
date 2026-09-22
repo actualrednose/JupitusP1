@@ -1,12 +1,14 @@
 extends RefCounted
 class_name BattleAction
 
+
 enum TimingResult {
 	NONE,
 	MISS,
 	GOOD,
 	PERFECT,
 }
+
 
 var actor: CombatantState
 var ability: AbilityDefinition
@@ -37,7 +39,10 @@ func get_priority() -> int:
 
 
 func get_speed() -> int:
-	if actor == null or actor.definition == null:
+	if (
+		actor == null
+		or actor.definition == null
+	):
 		return 0
 
 	return actor.definition.speed

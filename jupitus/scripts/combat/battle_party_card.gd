@@ -1,6 +1,7 @@
 extends HBoxContainer
 class_name BattlePartyCard
 
+
 const ICON_OUTLINE_SHADER := """
 shader_type canvas_item;
 
@@ -10,7 +11,12 @@ uniform float outline_width : hint_range(1.0, 4.0) = 3.0;
 
 void fragment() {
 	vec2 padding = outline_width * TEXTURE_PIXEL_SIZE;
-	vec2 icon_uv = (UV - padding) / (vec2(1.0) - padding * 2.0);
+
+	vec2 icon_uv = (
+		(UV - padding)
+		/ (vec2(1.0) - padding * 2.0)
+	);
+
 	vec4 source = vec4(0.0);
 
 	if (
@@ -29,12 +35,16 @@ void fragment() {
 
 		for (int x = -4; x <= 4; x++) {
 			for (int y = -4; y <= 4; y++) {
-				vec2 offset = vec2(float(x), float(y));
+				vec2 offset = vec2(
+					float(x),
+					float(y)
+				);
 
 				if (length(offset) <= outline_width) {
 					vec2 sample_uv = (
 						icon_uv
-						+ offset * TEXTURE_PIXEL_SIZE
+						+ offset
+						* TEXTURE_PIXEL_SIZE
 					);
 
 					if (
@@ -55,22 +65,33 @@ void fragment() {
 			}
 		}
 
-		float outline_alpha = nearby_alpha * (1.0 - source.a);
+		float outline_alpha = (
+			nearby_alpha
+			* (1.0 - source.a)
+		);
+
 		vec3 final_color = mix(
 			outline_color.rgb,
 			source.rgb,
 			source.a
 		);
+
 		float final_alpha = max(
 			source.a,
 			outline_alpha * outline_color.a
 		);
-		COLOR = vec4(final_color, final_alpha);
+
+		COLOR = vec4(
+			final_color,
+			final_alpha
+		);
 	}
 }
 """
 
+
 signal clicked(combatant: CombatantState)
+
 
 var combatant: CombatantState
 
@@ -84,32 +105,29 @@ var _hp_value_label: Label
 var _tempo_bar: ProgressBar
 var _tempo_value_label: Label
 var _state_label: Label
+
 var _feedback := BattleActorView.new()
 var _built: bool = false
 var _value_tweens: Array[Tween] = []
 var _idle_sway_tween: Tween
 var _icon_outline_material: ShaderMaterial
 var _selected_action: BattleAction
-var _active: bool = false
-var _keyboard_selected: bool = false
 
 
 func _ready() -> void:
 	_ensure_built()
 
 
-func bind_combatant(
-	value: CombatantState
-) -> void:
+func bind_combatant(value: CombatantState) -> void:
 	combatant = value
 	_ensure_built()
 
 	if combatant == null:
 		return
 
-	_name_label.text = (
-		combatant.definition.display_name
-	)
+	_icon.texture = combatant.definition.icon
+	_name_label.text = combatant.definition.display_name
+
 	_configure_bars()
 	sync_from_state()
 
@@ -118,36 +136,13 @@ func set_active(value: bool) -> void:
 	if not _built:
 		return
 
-	_active = value
-	_refresh_outline()
-
-
-func set_keyboard_selected(
-	value: bool
-) -> void:
-	if not _built:
-		return
-
-	_keyboard_selected = value
-	_refresh_outline()
-
-
-func _refresh_outline() -> void:
 	_icon_outline_material.set_shader_parameter(
 		"outline_enabled",
-		_active or _keyboard_selected
-	)
-	_icon_outline_material.set_shader_parameter(
-		"outline_color",
-		Color("#7FDBFF")
-		if _keyboard_selected
-		else Color("#FFD84A")
+		value
 	)
 
 
-func set_selected_action(
-	action: BattleAction
-) -> void:
+func set_selected_action(action: BattleAction) -> void:
 	_selected_action = action
 	_refresh_state_label()
 
@@ -280,8 +275,10 @@ func show_tempo_change(
 	reduced_motion: bool = false
 ) -> void:
 	var prefix := "+" if amount >= 0 else ""
+
 	_feedback.show_number(
-		"%s%d TEMPO" % [
+		"%s%d TEMPO"
+		% [
 			prefix,
 			amount
 		],
@@ -312,13 +309,17 @@ func animate_result(
 	_stop_value_tweens()
 
 	if result.hp_after != result.hp_before:
-		_hp_value_label.text = "%d/%d" % [
-			result.hp_after,
-			combatant.definition.max_hp
-		]
+		_hp_value_label.text = (
+			"%d/%d"
+			% [
+				result.hp_after,
+				combatant.definition.max_hp
+			]
+		)
 
 		var hp_tween := create_tween()
 		_value_tweens.append(hp_tween)
+
 		hp_tween.tween_property(
 			_hp_bar,
 			"value",
@@ -334,6 +335,7 @@ func animate_result(
 			hp_tween.tween_interval(
 				duration * 0.2
 			)
+
 			hp_tween.tween_property(
 				_hp_trail_bar,
 				"value",
@@ -348,13 +350,17 @@ func animate_result(
 			_hp_trail_bar.value = result.hp_after
 
 	if result.tempo_after != result.tempo_before:
-		_tempo_value_label.text = "%d/%d" % [
-			result.tempo_after,
-			combatant.definition.max_tempo
-		]
+		_tempo_value_label.text = (
+			"%d/%d"
+			% [
+				result.tempo_after,
+				combatant.definition.max_tempo
+			]
+		)
 
 		var tempo_tween := create_tween()
 		_value_tweens.append(tempo_tween)
+
 		tempo_tween.tween_property(
 			_tempo_bar,
 			"value",
@@ -387,12 +393,14 @@ func pulse_tempo(
 
 	var tween := create_tween()
 	_value_tweens.append(tween)
+
 	tween.tween_property(
 		_tempo_bar,
 		"modulate",
 		Color("#FFF2A8"),
 		duration * 0.35
 	)
+
 	tween.tween_property(
 		_tempo_bar,
 		"modulate",
@@ -407,18 +415,27 @@ func sync_from_state() -> void:
 
 	_feedback.skip_and_reset()
 	_stop_value_tweens()
-	_refresh_icon()
+
 	_hp_bar.value = combatant.current_hp
 	_hp_trail_bar.value = combatant.current_hp
-	_hp_value_label.text = "%d/%d" % [
-		combatant.current_hp,
-		combatant.definition.max_hp
-	]
+
+	_hp_value_label.text = (
+		"%d/%d"
+		% [
+			combatant.current_hp,
+			combatant.definition.max_hp
+		]
+	)
+
 	_tempo_bar.value = combatant.current_tempo
-	_tempo_value_label.text = "%d/%d" % [
-		combatant.current_tempo,
-		combatant.definition.max_tempo
-	]
+
+	_tempo_value_label.text = (
+		"%d/%d"
+		% [
+			combatant.current_tempo,
+			combatant.definition.max_tempo
+		]
+	)
 
 	if combatant.is_defeated():
 		_icon_feedback.modulate = Color(
@@ -434,20 +451,6 @@ func sync_from_state() -> void:
 	_feedback.recapture_base_modulate()
 
 
-func _refresh_icon() -> void:
-	var icon := combatant.definition.icon
-
-	if (
-		combatant.is_damaged()
-		and combatant.definition.damaged_icon != null
-	):
-		icon = (
-			combatant.definition.damaged_icon
-		)
-
-	_icon.texture = icon
-
-
 func skip_presentation() -> void:
 	_feedback.skip_and_reset()
 	_stop_value_tweens()
@@ -458,93 +461,114 @@ func _ensure_built() -> void:
 		return
 
 	_built = true
+
 	custom_minimum_size = Vector2(
 		300.0,
 		120.0
 	)
+
 	add_theme_constant_override(
 		"separation",
 		12
 	)
+
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	gui_input.connect(_on_gui_input)
 
 	_icon_holder = PanelContainer.new()
+
 	_icon_holder.custom_minimum_size = Vector2(
 		96.0,
 		96.0
 	)
+
 	_icon_holder.mouse_filter = (
 		Control.MOUSE_FILTER_IGNORE
 	)
+
 	_icon_holder.add_theme_stylebox_override(
 		"panel",
 		StyleBoxEmpty.new()
 	)
+
 	add_child(_icon_holder)
 
 	_icon_feedback = Control.new()
+
 	_icon_feedback.mouse_filter = (
 		Control.MOUSE_FILTER_IGNORE
 	)
+
 	_icon_holder.add_child(_icon_feedback)
+
 	_icon_feedback.set_anchors_and_offsets_preset(
 		Control.PRESET_FULL_RECT
 	)
+
 	_icon_feedback.pivot_offset = Vector2(
 		48.0,
 		48.0
 	)
 
 	_icon = TextureRect.new()
-	_icon.mouse_filter = (
-		Control.MOUSE_FILTER_IGNORE
-	)
+	_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 	_icon_feedback.add_child(_icon)
+
 	_icon.set_anchors_and_offsets_preset(
 		Control.PRESET_FULL_RECT
 	)
+
 	_icon.expand_mode = (
 		TextureRect.EXPAND_IGNORE_SIZE
 	)
+
 	_icon.stretch_mode = (
 		TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	)
+
 	_icon.texture_filter = (
 		CanvasItem.TEXTURE_FILTER_NEAREST
 	)
+
 	_icon.pivot_offset = Vector2(
 		48.0,
 		48.0
 	)
+
 	_icon_outline_material = (
 		_make_icon_outline_material()
 	)
+
 	_icon.material = _icon_outline_material
 
 	var stats := VBoxContainer.new()
-	stats.mouse_filter = (
-		Control.MOUSE_FILTER_IGNORE
-	)
+	stats.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 	stats.custom_minimum_size = Vector2(
 		190.0,
 		0.0
 	)
+
 	stats.add_theme_constant_override(
 		"separation",
 		4
 	)
+
 	add_child(stats)
 
 	_name_label = Label.new()
+
 	_name_label.add_theme_font_size_override(
 		"font_size",
 		22
 	)
+
 	_name_label.add_theme_color_override(
 		"font_color",
 		Color("#202020")
 	)
+
 	stats.add_child(_name_label)
 
 	var hp_row := _make_hp_row()
@@ -555,6 +579,7 @@ func _ensure_built() -> void:
 
 	_state_label = Label.new()
 	_state_label.visible = false
+
 	stats.add_child(_state_label)
 
 	_feedback.setup(
@@ -563,11 +588,13 @@ func _ensure_built() -> void:
 		_icon_feedback,
 		Vector2(24.0, -8.0)
 	)
+
 	_start_idle_sway()
 
 
 func _make_hp_row() -> HBoxContainer:
 	var row := HBoxContainer.new()
+
 	row.add_theme_constant_override(
 		"separation",
 		6
@@ -575,42 +602,52 @@ func _make_hp_row() -> HBoxContainer:
 
 	var label := Label.new()
 	label.text = "HP:"
+
 	label.custom_minimum_size = Vector2(
 		64.0,
 		0.0
 	)
+
 	row.add_child(label)
 
 	var bars := Control.new()
+
 	bars.custom_minimum_size = Vector2(
 		150.0,
 		20.0
 	)
+
 	row.add_child(bars)
 
 	_hp_trail_bar = _make_bar(
 		Color("#F0B14E"),
 		Color("#D8D8D8")
 	)
+
 	bars.add_child(_hp_trail_bar)
 
 	_hp_bar = _make_bar(
 		Color("#62D84E"),
 		Color(0.0, 0.0, 0.0, 0.0)
 	)
+
 	bars.add_child(_hp_bar)
 
 	_hp_value_label = Label.new()
+
 	_hp_value_label.custom_minimum_size = Vector2(
 		65.0,
 		0.0
 	)
+
 	row.add_child(_hp_value_label)
+
 	return row
 
 
 func _make_tempo_row() -> HBoxContainer:
 	var row := HBoxContainer.new()
+
 	row.add_theme_constant_override(
 		"separation",
 		6
@@ -618,28 +655,35 @@ func _make_tempo_row() -> HBoxContainer:
 
 	var label := Label.new()
 	label.text = "TEMPO:"
+
 	label.custom_minimum_size = Vector2(
 		64.0,
 		0.0
 	)
+
 	row.add_child(label)
 
 	_tempo_bar = _make_bar(
 		Color("#E5A24E"),
 		Color("#D8D8D8")
 	)
+
 	_tempo_bar.custom_minimum_size = Vector2(
 		150.0,
 		20.0
 	)
+
 	row.add_child(_tempo_bar)
 
 	_tempo_value_label = Label.new()
+
 	_tempo_value_label.custom_minimum_size = Vector2(
 		65.0,
 		0.0
 	)
+
 	row.add_child(_tempo_value_label)
+
 	return row
 
 
@@ -648,18 +692,23 @@ func _make_bar(
 	background_color: Color
 ) -> ProgressBar:
 	var bar := ProgressBar.new()
+
 	bar.set_anchors_and_offsets_preset(
 		Control.PRESET_FULL_RECT
 	)
+
 	bar.show_percentage = false
+
 	bar.add_theme_stylebox_override(
 		"background",
 		_make_bar_style(background_color)
 	)
+
 	bar.add_theme_stylebox_override(
 		"fill",
 		_make_bar_style(fill_color)
 	)
+
 	return bar
 
 
@@ -667,11 +716,13 @@ func _make_bar_style(
 	color: Color
 ) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
+
 	style.bg_color = color
 	style.corner_radius_top_left = 4
 	style.corner_radius_top_right = 4
 	style.corner_radius_bottom_left = 4
 	style.corner_radius_bottom_right = 4
+
 	return style
 
 
@@ -679,33 +730,31 @@ func _make_icon_outline_material() -> ShaderMaterial:
 	var shader := Shader.new()
 	shader.code = ICON_OUTLINE_SHADER
 
-	var material := ShaderMaterial.new()
-	material.shader = shader
-	material.set_shader_parameter(
+	var outline_material := ShaderMaterial.new()
+	outline_material.shader = shader
+
+	outline_material.set_shader_parameter(
 		"outline_color",
 		Color("#FFD84A")
 	)
-	material.set_shader_parameter(
+
+	outline_material.set_shader_parameter(
 		"outline_width",
 		3.0
 	)
-	material.set_shader_parameter(
+
+	outline_material.set_shader_parameter(
 		"outline_enabled",
 		false
 	)
-	return material
+
+	return outline_material
 
 
 func _configure_bars() -> void:
-	_hp_bar.max_value = (
-		combatant.definition.max_hp
-	)
-	_hp_trail_bar.max_value = (
-		combatant.definition.max_hp
-	)
-	_tempo_bar.max_value = (
-		combatant.definition.max_tempo
-	)
+	_hp_bar.max_value = combatant.definition.max_hp
+	_hp_trail_bar.max_value = combatant.definition.max_hp
+	_tempo_bar.max_value = combatant.definition.max_tempo
 
 
 func _became_skill_ready(
@@ -725,10 +774,7 @@ func _became_skill_ready(
 
 func _stop_value_tweens() -> void:
 	for tween in _value_tweens:
-		if (
-			tween != null
-			and tween.is_valid()
-		):
+		if tween != null and tween.is_valid():
 			tween.kill()
 
 	_value_tweens.clear()
@@ -744,12 +790,8 @@ func _start_idle_sway() -> void:
 
 	_idle_sway_tween = _icon.create_tween()
 	_idle_sway_tween.set_loops()
-	_idle_sway_tween.set_trans(
-		Tween.TRANS_SINE
-	)
-	_idle_sway_tween.set_ease(
-		Tween.EASE_IN_OUT
-	)
+	_idle_sway_tween.set_trans(Tween.TRANS_SINE)
+	_idle_sway_tween.set_ease(Tween.EASE_IN_OUT)
 
 	_idle_sway_tween.tween_property(
 		_icon,
@@ -796,32 +838,33 @@ func _refresh_state_label() -> void:
 	if combatant.is_defeated():
 		_state_label.text = "DEFEATED"
 		_state_label.visible = true
+
 	elif combatant.is_guarding:
 		_state_label.text = "GUARDING"
 		_state_label.visible = true
+
 	elif _selected_action != null:
 		_state_label.text = (
 			"READY: %s"
 			% _selected_action.ability.display_name
 		)
+
 		_state_label.visible = true
+
 	else:
 		_state_label.text = ""
 		_state_label.visible = false
 
 
-func _on_gui_input(
-	event: InputEvent
-) -> void:
-	if event is InputEventMouseButton:
-		var mouse_event := (
-			event as InputEventMouseButton
-		)
+func _on_gui_input(event: InputEvent) -> void:
+	if event is not InputEventMouseButton:
+		return
 
-		if (
-			mouse_event.button_index
-				== MOUSE_BUTTON_LEFT
-			and mouse_event.pressed
-		):
-			clicked.emit(combatant)
-			accept_event()
+	var mouse_event := event as InputEventMouseButton
+
+	if (
+		mouse_event.button_index == MOUSE_BUTTON_LEFT
+		and mouse_event.pressed
+	):
+		clicked.emit(combatant)
+		accept_event()
