@@ -1,4 +1,3 @@
-# dialogue_data.gd
 # -----------------------------------------------------------------------------
 # A Resource representing a complete conversation. Contains an array of
 # DialogueLine resources, played in order (with optional branching).
@@ -25,7 +24,8 @@ class_name DialogueData
 ## order unless a line's choices or next_line_id change the flow.
 ##
 ## In the Inspector, you'll see an array you can add/remove/reorder elements
-## in. Each element expands to show its speaker, text, emotion, and choices.
+## in. Each element expands to show its speaker, text, emotion, portrait facing,
+## and choices.
 @export var lines: Array[DialogueLine] = []
 
 ## Optional: a flag that must be set for this conversation to play.

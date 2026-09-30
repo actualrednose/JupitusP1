@@ -65,6 +65,7 @@ var _accent_audio: AudioStreamPlayer
 var _charge_audio: AudioStreamPlayer
 var _text_stage_skip_requested: bool = false
 
+
 func _ready() -> void:
 	_effect_audio = AudioStreamPlayer.new()
 	_effect_audio.name = "EffectAudio"
@@ -132,14 +133,17 @@ func set_fast_forwarding(value: bool) -> void:
 func is_presenting() -> bool:
 	return _presenting
 
+
 func skip_current_text_stage() -> void:
 	if _presenting:
 		_text_stage_skip_requested = true
+
 
 func present_power_attack_charge(
 	combatant: CombatantState
 ) -> void:
 	var view: Object = _views.get(combatant)
+
 	_call_view(
 		view,
 		"play_power_charge",
@@ -149,6 +153,7 @@ func present_power_attack_charge(
 			reduced_flashing
 		]
 	)
+
 	_play_audio(
 		power_attack_charge_sound,
 		_charge_audio
@@ -199,6 +204,7 @@ func skip_current_presentation() -> void:
 	presentation_skipped.emit(skipped_action)
 	call_deferred("_continue_resolution")
 
+
 func _on_action_resolved(
 	action: BattleAction
 ) -> void:
@@ -209,10 +215,12 @@ func _on_action_resolved(
 	_presentation_id += 1
 	_presenting = true
 	_current_action = action
+
 	_present_action.call_deferred(
 		action,
 		_presentation_id
 	)
+
 
 func _present_action(
 	action: BattleAction,
@@ -306,6 +314,7 @@ func _present_action(
 		presentation_id
 	)
 
+
 func _present_effect(
 	result: BattleEffectResult,
 	actor_view: Object,
@@ -348,6 +357,17 @@ func _present_effect(
 			result_duration,
 			presentation_id
 		)
+
+	# Stagger is conditional: an attack can include a stagger effect without
+	# the target currently preparing a power attack. In that case the damage
+	# still applies, but there is no player-facing failure to report.
+	if (
+		not result.applied
+		and result.effect != null
+		and result.effect.effect_type
+			== AbilityEffectDefinition.EffectType.STAGGER
+	):
+		return true
 
 	if not result.applied:
 		_call_view(
@@ -633,7 +653,6 @@ func _present_effect(
 	return true
 
 
-
 func _finish_presentation(
 	action: BattleAction,
 	presentation_id: int
@@ -687,6 +706,7 @@ func _wait(
 
 	return _is_current(presentation_id)
 
+
 func _finish_text_stage(
 	elapsed_duration: float,
 	presentation_id: int
@@ -720,6 +740,7 @@ func _finish_text_stage(
 
 	_text_stage_skip_requested = false
 	return _is_current(presentation_id)
+
 
 func _is_current(
 	presentation_id: int
@@ -809,11 +830,13 @@ func _play_shake(
 		return
 
 	_stop_shake()
+
 	var strength := minf(
 		camera_shake_strength
 			+ float(amount) * 0.08,
 		camera_shake_strength * 2.0
 	)
+
 	var shake_direction := (
 		-direction.normalized()
 	)

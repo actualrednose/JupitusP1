@@ -417,6 +417,7 @@ func sync_from_state() -> void:
 
 	_feedback.skip_and_reset()
 	_stop_value_tweens()
+	_refresh_icon_texture()
 
 	_hp_bar.value = combatant.current_hp
 	_hp_trail_bar.value = combatant.current_hp
@@ -451,6 +452,18 @@ func sync_from_state() -> void:
 
 	_refresh_state_label()
 	_feedback.recapture_base_modulate()
+
+
+func _refresh_icon_texture() -> void:
+	var icon := combatant.definition.icon
+
+	if (
+		combatant.is_damaged()
+		and combatant.definition.damaged_icon != null
+	):
+		icon = combatant.definition.damaged_icon
+
+	_icon.texture = icon
 
 
 func skip_presentation() -> void:

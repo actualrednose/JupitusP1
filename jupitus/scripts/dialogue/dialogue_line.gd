@@ -1,4 +1,3 @@
-# dialogue_line.gd
 # -----------------------------------------------------------------------------
 # A Resource representing a single line of dialogue.
 # A conversation is a list of these, played in sequence (or branched via
@@ -8,6 +7,7 @@
 #   - speaker:        which DialogueCharacter is talking
 #   - text:           the actual line of dialogue
 #   - emotion:        optional emotion name (looks up speaker's emotion_portraits)
+#   - flip_portrait_h: optionally mirror the speaker's portrait horizontally
 #   - choices:        optional list of choices the player can pick (for branching)
 #   - next_line_id:   optional explicit "go to this line next" (for non-linear)
 #
@@ -53,6 +53,11 @@ class_name DialogueLine
 ## Example: emotion = "happy" → uses speaker.emotion_portraits["happy"]
 ## If the emotion doesn't exist, falls back to the default portrait.
 @export var emotion: String = ""
+
+## If true, mirror the speaker's portrait horizontally for this line.
+## This lets a character face the opposite direction without requiring a
+## separate portrait texture.
+@export var flip_portrait_h: bool = false
 
 ## Optional list of choices. If non-empty, after this line finishes typing,
 ## the dialogue box shows a numbered list of these choices. The player

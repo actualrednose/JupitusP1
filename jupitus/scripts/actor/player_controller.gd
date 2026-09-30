@@ -5,12 +5,13 @@
 # What this script does:
 #   - Reads WASD / arrow input and moves the character on the XZ plane
 #   - Smoothly accelerates/decelerates so movement feels weighty, not robotic
-#   - Flips the sprite horizontally based on movement direction
-#   - Switches between "idle" and "walk" animations automatically
+#   - Uses separate left/right walk animations without mirroring the sprite
+#   - Always uses the left-facing neutral animation while stopped
 #
 # Required node setup (see README for full details):
 #   CharacterBody3D (Player)   <- this script
-#   ├── AnimatedSprite3D       (name it "Sprite", needs "idle" + "walk" anims)
+#   ├── AnimatedSprite3D       (name it "Sprite", needs "idle",
+#   │                           "walk_left", and "walk_right" anims)
 #   └── CollisionShape3D       (CapsuleShape3D recommended)
 #
 # Expected input actions (set up in Project Settings → Input Map):
@@ -36,10 +37,17 @@ class_name PlayerController
 @export var friction: float = 12.0
 
 @export_group("Sprite")
-## If true, the sprite's flip_h property auto-updates to face movement direction.
-## Set this to false if you have separate left/right animations in your
-## SpriteFrames resource and want to swap animations instead of flipping.
-@export var flip_sprite_to_face_direction: bool = true
+## Neutral animation shown whenever the player is stopped. This should be the
+## left-facing version so the sprite is never mirrored.
+@export var idle_animation: StringName = &"idle"
+
+## Animation used while moving left. Use a separately authored left-facing
+## sprite instead of relying on AnimatedSprite3D.flip_h.
+@export var walk_left_animation: StringName = &"walk_left"
+
+## Animation used while moving right. Use a separately authored right-facing
+## sprite instead of relying on AnimatedSprite3D.flip_h.
+@export var walk_right_animation: StringName = &"walk_right"
 
 ## The path to the AnimatedSprite3D child node. Change this if you rename
 ## the node in your scene tree. Using NodePath (^"...") is the correct type
@@ -57,6 +65,11 @@ class_name PlayerController
 # We cache it so _physics_process reads it once, then both the facing
 # and animation update functions can use it without re-querying input.
 var _input_direction: Vector2 = Vector2.ZERO
+
+# Used for movement that has no horizontal component. Resetting this when the
+# player stops makes the next vertical movement start with the left-facing
+# walk animation.
+var _last_walked_right: bool = false
 
 # When true, the player ignores all input and decelerates to a stop.
 # Set by the DialogueManager (and cutscene system, later) via set_frozen().
@@ -80,7 +93,6 @@ func _physics_process(delta: float) -> void:
 		# Decelerate to zero so the player stops gracefully
 		velocity = velocity.move_toward(Vector3.ZERO, friction * delta)
 		move_and_slide()
-		_update_sprite_facing()
 		_update_sprite_animation()
 		return
 
@@ -136,8 +148,7 @@ func _physics_process(delta: float) -> void:
 	# the property directly. (This changed from Godot 3.)
 	move_and_slide()
 
-	# Step 5: Update sprite visuals (facing + animation).
-	_update_sprite_facing()
+	# Step 5: Update sprite animation.
 	_update_sprite_animation()
 
 
@@ -145,20 +156,8 @@ func _physics_process(delta: float) -> void:
 # Sprite helpers
 # -----------------------------------------------------------------------------
 
-func _update_sprite_facing() -> void:
-	if not flip_sprite_to_face_direction:
-		return
-	# Only update facing when there's clear horizontal input. This prevents
-	# the sprite from flipping back and forth when input is released.
-	# The 0.01 threshold filters out stick drift / barely-pressed keys.
-	if abs(_input_direction.x) > 0.01:
-		# flip_h = true mirrors the sprite horizontally.
-		# Moving left (negative X) → flip so the sprite faces left.
-		_sprite.flip_h = _input_direction.x < 0
-
-
 func _update_sprite_animation() -> void:
-	# Switch between "idle" and "walk" based on actual velocity, not input.
+	# Switch between idle and walking based on actual velocity, not input.
 	# Using velocity means the walk animation only plays once the character
 	# is actually moving, which looks better than animating in place during
 	# the acceleration ramp.
@@ -166,11 +165,26 @@ func _update_sprite_animation() -> void:
 	# The 0.1 threshold filters out tiny residual velocities from physics
 	# rounding so the animation doesn't flicker when standing still.
 	if velocity.length() > 0.1:
-		if _sprite.animation != &"walk":
-			_sprite.play(&"walk")
+		# Select a separately-authored animation based on horizontal movement.
+		# For vertical movement, retain the current horizontal walk direction.
+		if abs(velocity.x) > 0.01:
+			_last_walked_right = velocity.x > 0.0
+
+		var walk_animation := (
+			walk_right_animation
+			if _last_walked_right
+			else walk_left_animation
+		)
+
+		if _sprite.animation != walk_animation:
+			_sprite.play(walk_animation)
 	else:
-		if _sprite.animation != &"idle":
-			_sprite.play(&"idle")
+		# Emm's idle sprite must always be the authored left-facing version.
+		_last_walked_right = false
+		_sprite.flip_h = false
+
+		if _sprite.animation != idle_animation:
+			_sprite.play(idle_animation)
 
 
 # -----------------------------------------------------------------------------
@@ -198,24 +212,11 @@ func is_frozen() -> bool:
 	return _frozen
 
 
-## Set the player's facing direction based on a 3D direction vector.
-## Used by SceneManager when placing the player at a spawn point — the
-## spawn point's forward direction (-Z axis) determines which way the
-## player should face.
-##
-## We only care about the X component for sprite flipping, since the
-## player doesn't actually rotate in 3D (just flips the sprite).
-##
-## Example:
-##   player.face_direction(Vector3(1, 0, 0))   # face right
-##   player.face_direction(Vector3(-1, 0, 0))  # face left
-##   player.face_direction(Vector3(0, 0, -1))  # face "away" (no flip change)
-func face_direction(direction: Vector3) -> void:
-	# Only update facing if there's a clear horizontal direction.
-	# This prevents the sprite from flipping when the direction is mostly
-	# forward/backward (which we don't represent visually).
-	if abs(direction.x) > 0.1:
-		_sprite.flip_h = direction.x < 0
+## Preserve the facing API used by scene transitions and cutscenes.
+## Emm uses authored left/right animations, so an external facing request
+## cannot mirror the sprite. When stopped, her neutral sprite remains left-facing.
+func face_direction(_direction: Vector3) -> void:
+	_sprite.flip_h = false
 
 
 # -----------------------------------------------------------------------------
@@ -223,6 +224,9 @@ func face_direction(direction: Vector3) -> void:
 # -----------------------------------------------------------------------------
 
 func _ready() -> void:
+	_sprite.flip_h = true
+	_sprite.play(idle_animation)
+
 	# Register the player in the "player" group so other systems can find us
 	# via get_tree().get_nodes_in_group("player"). We do this in code rather
 	# than in the editor because:
@@ -248,4 +252,3 @@ func _ready() -> void:
 # COMBAT TRANSITION:
 #   When the player triggers a battle, freeze input here (set a `frozen` bool
 #   and early-return from _physics_process), then trigger the scene transition.
-#   Unfreeze when returning from battle.

@@ -1,4 +1,3 @@
-# dialogue_box.gd
 # -----------------------------------------------------------------------------
 # Attach to: the root Control of dialogue_box.tscn
 #
@@ -301,6 +300,7 @@ func start_dialogue(data: DialogueData) -> void:
 		if slot:
 			slot.visible = false
 			slot.texture = null
+			slot.flip_h = false
 
 	# Show the box and dimmer.
 	_show_box(true)
@@ -336,6 +336,7 @@ func end_dialogue() -> void:
 										existing_tween.kill()
 						slot.visible = false
 						slot.texture = null
+						slot.flip_h = false
 						slot.modulate = dimmed_portrait_color  # reset to dimmed for next time
 
 		conversation_ended.emit()
@@ -461,6 +462,14 @@ func _update_speaker_ui(line: DialogueLine) -> void:
 		if not _character_slots.has(speaker_id):
 				_assign_slot(line.speaker, speaker_id)
 
+		# Apply the per-line facing override after assigning the slot so it also
+		# updates when a character speaks again later in the conversation.
+		var speaker_slot: int = _character_slots.get(speaker_id, -1)
+		if speaker_slot >= 0 and _portrait_slots.has(speaker_slot):
+				var speaker_portrait: TextureRect = _portrait_slots[speaker_slot]
+				if speaker_portrait:
+						speaker_portrait.flip_h = line.flip_portrait_h
+
 		# Update which slot is the "active" (full brightness) one
 		_current_speaker = line.speaker
 		_update_portrait_brightness()
@@ -526,6 +535,7 @@ func _assign_slot(character: DialogueCharacter, speaker_id: int) -> void:
 				var slot: TextureRect = _portrait_slots[slot_index]
 				if slot:
 						slot.texture = character.get_portrait("")
+						slot.flip_h = false
 						slot.visible = true
 
 
@@ -830,7 +840,7 @@ func _show_dimmer(make_visible: bool) -> void:
 #
 # 1. PER-CHARACTER BLIP PITCH
 #    Each DialogueCharacter could have a `blip_pitch: float` property.
-#    When that character is speaking, the dialogue box uses their pitch
+#    When that character is speaking, the dialogue box uses their `blip_pitch`
 #    as the base for blip variation. High-pitched characters sound
 #    different from low-pitched ones.
 #
