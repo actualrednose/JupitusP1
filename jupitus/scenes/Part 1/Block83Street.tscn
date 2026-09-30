@@ -1,0 +1,87 @@
+[gd_scene format=3 uid="uid://clyk6lgtxgovm"]
+
+[ext_resource type="PackedScene" uid="uid://dc23j6ccc3lrp" path="res://scenes/effects/light_snow.tscn" id="1_th170"]
+[ext_resource type="Script" uid="uid://cscaqj7hdtdk2" path="res://scripts/camera/stage_camera.gd" id="1_xeefs"]
+[ext_resource type="Texture2D" uid="uid://b3nnl17ouju5x" path="res://resources/sprites/environmental/kogelmart/floor.png" id="2_1v2ai"]
+[ext_resource type="PackedScene" uid="uid://vgdqftmjjxgq" path="res://scenes/player.tscn" id="3_1v2ai"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_th170"]
+sky_top_color = Color(0.2678559, 0.6846851, 0.8065201, 1)
+sky_horizon_color = Color(0.90059215, 0.5357922, 0.5423002, 1)
+sky_curve = 0.06997758
+ground_bottom_color = Color(0.7172046, 0.7468712, 0.7224358, 1)
+ground_horizon_color = Color(0.9663304, 0.5437564, 0.59657824, 1)
+sun_angle_max = 0.0
+
+[sub_resource type="Sky" id="Sky_1v2ai"]
+sky_material = SubResource("ProceduralSkyMaterial_th170")
+
+[sub_resource type="Environment" id="Environment_1v2ai"]
+background_mode = 2
+background_energy_multiplier = 1.4
+sky = SubResource("Sky_1v2ai")
+ambient_light_color = Color(0.8299518, 0.90497196, 0.8066923, 1)
+fog_enabled = true
+fog_light_color = Color(0.75985634, 0.75918555, 0.74660057, 1)
+fog_density = 0.0883
+fog_sky_affect = 0.19
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.02
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8xg12"]
+albedo_color = Color(0.16206557, 0.1620656, 0.16206557, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_th170"]
+material = SubResource("StandardMaterial3D_8xg12")
+size = Vector2(20, 20)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aw38s"]
+albedo_texture = ExtResource("2_1v2ai")
+uv1_scale = Vector3(7.4, 7.4, 7.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_eax82"]
+size = Vector3(11.02, 0.1, 4.95)
+
+[node name="Block83Street" type="Node3D" unique_id=1200805388]
+
+[node name="LightSnow" parent="." unique_id=1570160569 instance=ExtResource("1_th170")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7.2926497, 0)
+fall_speed = 0.7
+snow_color = Color(0.9320739, 0.95985574, 0.9799481, 0.81960785)
+
+[node name="Player" parent="." unique_id=1266291996 instance=ExtResource("3_1v2ai")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.255884, 0.7184768, -1.8361237)
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1314442697 node_paths=PackedStringArray("target")]
+script = ExtResource("1_xeefs")
+target = NodePath("../Player")
+pitch_degrees = 15.0
+distance = 3.6
+follow_smoothing = 1.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=192056411]
+environment = SubResource("Environment_1v2ai")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=649636134]
+transform = Transform3D(0.9998325, 0.017751457, 0.0044577993, -0.017095927, 0.8188155, 0.5738022, 0.006535709, -0.5737822, 0.8189819, 0, 3.827786, 9.346676)
+light_color = Color(0.6608805, 0.8239092, 0.8000514, 1)
+light_energy = 0.9
+shadow_enabled = true
+shadow_bias = 0.01
+shadow_normal_bias = 7.435
+directional_shadow_mode = 0
+directional_shadow_fade_start = 0.86
+directional_shadow_max_distance = 8.6
+
+[node name="Floor" type="StaticBody3D" parent="." unique_id=443610742]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor" unique_id=1083981814]
+transform = Transform3D(0.55366856, 0, 0, 0, 1, 0, 0, 0, 0.2491031, 0, 0, 0)
+mesh = SubResource("PlaneMesh_th170")
+surface_material_override/0 = SubResource("StandardMaterial3D_aw38s")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=695470077]
+shape = SubResource("BoxShape3D_eax82")
+
+[node name="from_kogel" type="Marker3D" parent="." unique_id=202255552 groups=["spawn_point"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.248, 0, -0.125)

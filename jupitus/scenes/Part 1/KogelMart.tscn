@@ -2,12 +2,14 @@
 
 [ext_resource type="Script" uid="uid://djg0cok8u1i1v" path="res://scripts/systems/kogel_mart_progression.gd" id="1_8bpro"]
 [ext_resource type="Script" uid="uid://cscaqj7hdtdk2" path="res://scripts/camera/stage_camera.gd" id="1_rm8ds"]
+[ext_resource type="Script" uid="uid://c4peqivqwm4pe" path="res://scripts/systems/scene_transition_trigger.gd" id="2_nryi6"]
 [ext_resource type="Texture2D" uid="uid://b3nnl17ouju5x" path="res://resources/sprites/environmental/kogelmart/floor.png" id="2_o8yeu"]
 [ext_resource type="Texture2D" uid="uid://b7xequfddljd6" path="res://resources/sprites/environmental/kogelmart/Skyline.png" id="3_rm8ds"]
 [ext_resource type="PackedScene" uid="uid://vgdqftmjjxgq" path="res://scenes/player.tscn" id="3_xmejl"]
 [ext_resource type="Texture2D" uid="uid://gmnskd4xqopv" path="res://resources/sprites/environmental/kogelmart/Fridges.png" id="4_5o2a2"]
 [ext_resource type="Texture2D" uid="uid://b3asc3kph64w" path="res://resources/sprites/environmental/kogelmart/Shelve big.png" id="4_xmejl"]
 [ext_resource type="Texture2D" uid="uid://xrxug6k6ny1p" path="res://resources/sprites/environmental/kogelmart/ShelveSmall.png" id="5_28ksu"]
+[ext_resource type="Texture2D" uid="uid://cmj2td15t6xyb" path="res://resources/sprites/environmental/kogelmart/R3701318-02.webp" id="6_8xwa7"]
 [ext_resource type="Texture2D" uid="uid://bo7y5n5wpx1ij" path="res://resources/sprites/NPCs/KogelBotCashier.png" id="8_7dxde"]
 [ext_resource type="Script" uid="uid://d3a83b7v6ytes" path="res://scripts/actor/milk_interactable.gd" id="8_22vjl"]
 [ext_resource type="Script" uid="uid://bxf0f2tcm3vx0" path="res://scripts/actor/battle_encounter_NPC.gd" id="8_vl3xx"]
@@ -32,12 +34,16 @@
 [ext_resource type="Resource" uid="uid://dg5kpnhdu8s77" path="res://resources/dialogue/characters/KogelBot.tres" id="19_vl3xx"]
 [ext_resource type="Resource" uid="uid://ijjru53jpo" path="res://resources/dialogue/kogelmart/cultist_after_battle.tres" id="25_q0lyd"]
 [ext_resource type="Script" uid="uid://vy77qyo6capm" path="res://scripts/cutscene/cutscene_action_move.gd" id="26_8bpro"]
+[ext_resource type="Texture2D" uid="uid://4xo1a438tooc" path="res://resources/sprites/environmental/kogelmart/door1.png" id="34_gwj8w"]
+[ext_resource type="Texture2D" uid="uid://bn08ruwyn2dtw" path="res://resources/sprites/environmental/kogelmart/door2.png" id="35_40lcg"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8xg12"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_01fuj"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v8d1x"]
 albedo_color = Color(0.16206557, 0.1620656, 0.16206557, 1)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_28ksu"]
-material = SubResource("StandardMaterial3D_8xg12")
+material = SubResource("StandardMaterial3D_v8d1x")
 size = Vector2(20, 20)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5o2a2"]
@@ -62,6 +68,14 @@ metallic = 0.35
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1nagh"]
 size = Vector3(0.45306396, 2.5698853, 4.407959)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gwj8w"]
+shading_mode = 0
+albedo_texture = ExtResource("6_8xwa7")
+uv1_scale = Vector3(3.02, 2.005, 3.96)
+
+[sub_resource type="BoxMesh" id="BoxMesh_73cvo"]
+size = Vector3(0.12963867, 0.17921448, 0.28894043)
 
 [sub_resource type="BoxMesh" id="BoxMesh_jjimy"]
 size = Vector3(2.74, 0.695, 0.105)
@@ -132,6 +146,7 @@ metadata/_custom_type_script = "uid://c8nbywjgw0vm5"
 script = ExtResource("12_4xk5b")
 speaker = ExtResource("18_ups6i")
 text = "Come on pal, open up. I just want a peek!"
+flip_portrait_h = true
 metadata/_custom_type_script = "uid://bkmif1qkyfocw"
 
 [sub_resource type="Resource" id="Resource_msw3j"]
@@ -200,8 +215,33 @@ pan_duration = 0.6
 ease_type = 0
 metadata/_custom_type_script = "uid://c8nbywjgw0vm5"
 
+[sub_resource type="BoxMesh" id="BoxMesh_h8psn"]
+size = Vector3(0.8785858, 1.5372467, 0.06536865)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1eb1t"]
+size = Vector3(3.3967285, 0.16125488, 0.19628906)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xufgy"]
+disable_ambient_light = true
+albedo_color = Color(0.6901961, 1, 1, 1)
+emission_enabled = true
+emission = Color(0.24963498, 0.8900503, 0.8904851, 1)
+
 [node name="KogelMart" type="Node3D" unique_id=1560995785]
 script = ExtResource("1_8bpro")
+
+[node name="DoorToBlock83" type="Area3D" parent="." unique_id=773194768]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.28396, -0.066515446, -2.0881598)
+script = ExtResource("2_nryi6")
+target_scene = "res://scenes/Part 1/Block83Street.tscn"
+target_spawn_point = "from_kogel"
+trigger_mode = 1
+prompt_override = "Press E"
+metadata/_custom_type_script = "uid://c4peqivqwm4pe"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DoorToBlock83" unique_id=2012395140]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.41047502)
+shape = SubResource("CapsuleShape3D_01fuj")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=452366543]
 script = ExtResource("1_rm8ds")
@@ -223,7 +263,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_5o2a2")
 shape = SubResource("BoxShape3D_5o2a2")
 
 [node name="Player" parent="." unique_id=1266291996 instance=ExtResource("3_xmejl")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.255884, 0.7184768, -1.8361237)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.3261786, 0.7184768, -1.8361237)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1927001214]
 transform = Transform3D(-0.99516666, -0.069438234, 0.069438234, -0.017095927, 0.8188155, 0.5738021, -0.09670091, 0.5698416, -0.81604505, 0, 3.827786, -19.892654)
@@ -239,10 +279,15 @@ directional_shadow_max_distance = 8.6
 environment = SubResource("Environment_rm8ds")
 
 [node name="CeilingLight" type="OmniLight3D" parent="." unique_id=1288905400]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1817422, 2.6416523, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1817422, 2.8729143, 0)
 light_color = Color(0.41141254, 0.7806603, 0.807375, 1)
 light_energy = 1.481
 shadow_enabled = true
+
+[node name="CeilingLight3" type="OmniLight3D" parent="." unique_id=1285879949]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.226721, 1.6888322, 0.1338467)
+light_color = Color(0, 0.8414986, 0.5642611, 1)
+light_energy = 0.463
 
 [node name="CeilingLight2" type="OmniLight3D" parent="." unique_id=686515042]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8656936, 2.6416523, 0)
@@ -264,6 +309,14 @@ texture = ExtResource("4_5o2a2")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Fridges/StaticBody3D" unique_id=477900584]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06436157, 0.01889038, -0.0032958984)
 shape = SubResource("BoxShape3D_1nagh")
+
+[node name="Exit Light" type="MeshInstance3D" parent="." unique_id=1103810494]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.4046483, 1.6804141, 0.086485)
+layers = 3
+material_override = SubResource("StandardMaterial3D_gwj8w")
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("BoxMesh_73cvo")
 
 [node name="Aisle Shelves" type="Node3D" parent="." unique_id=53611076]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.018430948, 0.23371863, -2.5122795)
@@ -415,6 +468,8 @@ prompt_text = "Press E (?)"
 
 [node name="Sprite3D" type="Sprite3D" parent="MachineCultist" unique_id=1037577489]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04374802, 1.234856)
+billboard = 1
+shaded = true
 texture = ExtResource("9_h7tew")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MachineCultist" unique_id=389556764]
@@ -435,6 +490,7 @@ enabled = false
 [node name="Sprite3D" type="Sprite3D" parent="KogelBotClerk" unique_id=19749913]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.22888494)
 billboard = 1
+shaded = true
 texture = ExtResource("8_7dxde")
 
 [node name="DialogueCollision" type="CollisionShape3D" parent="KogelBotClerk" unique_id=2059416067]
@@ -481,7 +537,7 @@ script = ExtResource("17_v2hqh")
 cutscene_player = NodePath("..")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RobberyCutscene/Area3D" unique_id=920015894]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.262538, 0, -2.0273101)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.0845802, 0, -2.0273101)
 shape = SubResource("BoxShape3D_1eb1t")
 
 [node name="PostBattleCutscene" type="Node" parent="." unique_id=465737492]
@@ -489,4 +545,32 @@ script = ExtResource("10_ng2d6")
 actions = Array[ExtResource("11_v2hqh")]([SubResource("Resource_wdspd"), SubResource("Resource_5kefk"), SubResource("Resource_281g8"), SubResource("Resource_1ti04")])
 
 [node name="CultistExit" type="Marker3D" parent="PostBattleCutscene" unique_id=71375267]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.2372794, 0.589, -2.2237577)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.2372794, 0.589, -2.5643735)
+
+[node name="Door1" type="MeshInstance3D" parent="." unique_id=397114796]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.2752695, 0.78188217, -2.458993)
+mesh = SubResource("BoxMesh_h8psn")
+
+[node name="Sprite3D" type="Sprite3D" parent="Door1" unique_id=2138098630]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.04)
+shaded = true
+texture = ExtResource("34_gwj8w")
+
+[node name="Door2" type="MeshInstance3D" parent="." unique_id=840078381]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 5.4652867, 0.78188217, 0.08992964)
+mesh = SubResource("BoxMesh_h8psn")
+
+[node name="Sprite3D" type="Sprite3D" parent="Door2" unique_id=2103444554]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.04)
+shaded = true
+texture = ExtResource("35_40lcg")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=43873070]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1224763, 3.2294803, 0)
+mesh = SubResource("BoxMesh_1eb1t")
+surface_material_override/0 = SubResource("StandardMaterial3D_xufgy")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1900451986]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8755114, 3.2294803, 0)
+mesh = SubResource("BoxMesh_1eb1t")
+surface_material_override/0 = SubResource("StandardMaterial3D_xufgy")

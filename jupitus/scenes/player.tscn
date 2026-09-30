@@ -3,15 +3,22 @@
 [ext_resource type="Script" uid="uid://bacrknbigd0xq" path="res://scripts/actor/player_controller.gd" id="1_fkybt"]
 [ext_resource type="Texture2D" uid="uid://5bgofj48yvkv" path="res://resources/TestChar Sprite/Idle.png" id="2_x3wgy"]
 [ext_resource type="Texture2D" uid="uid://blgejqvps8xqj" path="res://resources/TestChar Sprite/Walk1.png" id="3_3smsa"]
+[ext_resource type="Texture2D" uid="uid://b260q33s0hm20" path="res://resources/sprites/party/emm/emmneutral.png" id="3_fjrip"]
+[ext_resource type="Texture2D" uid="uid://bsxsaviqolp3p" path="res://resources/sprites/party/emm/emmwalkleft1.png" id="3_jej6c"]
 [ext_resource type="Texture2D" uid="uid://ctcg5koofn03n" path="res://resources/TestChar Sprite/Walk2.png" id="4_8erm5"]
+[ext_resource type="Texture2D" uid="uid://blpk5kwmk2ek4" path="res://resources/sprites/party/emm/emmwalkleft2.png" id="4_f1ej7"]
 [ext_resource type="Texture2D" uid="uid://bx8ok4stgqgqo" path="res://resources/TestChar Sprite/Walk.png" id="5_f1ek2"]
+[ext_resource type="Texture2D" uid="uid://lm02sh2vtfmj" path="res://resources/sprites/party/emm/emmwalkleft3.png" id="5_oprun"]
+[ext_resource type="Texture2D" uid="uid://c8txnf37kjbyh" path="res://resources/sprites/party/emm/emmwalkright2.png" id="6_smehm"]
 [ext_resource type="Script" uid="uid://bv3iihe7lngr2" path="res://scripts/actor/party_follower.gd" id="6_tuyoq"]
+[ext_resource type="Texture2D" uid="uid://du8c3arq1qvxb" path="res://resources/sprites/party/emm/emmwalkright1.png" id="6_y4r1p"]
+[ext_resource type="Texture2D" uid="uid://bcw7c1kyeudcm" path="res://resources/sprites/party/emm/emmwalkright3.png" id="8_d2wvv"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_01fuj"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_x3wgy")
+"texture": ExtResource("3_fjrip")
 }],
 "loop": 1,
 "name": &"idle",
@@ -19,20 +26,37 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("3_3smsa")
+"texture": ExtResource("3_jej6c")
 }, {
 "duration": 1.0,
-"texture": ExtResource("4_8erm5")
+"texture": ExtResource("4_f1ej7")
 }, {
 "duration": 1.0,
-"texture": ExtResource("5_f1ek2")
+"texture": ExtResource("5_oprun")
 }, {
 "duration": 1.0,
-"texture": ExtResource("4_8erm5")
+"texture": ExtResource("4_f1ej7")
 }],
 "loop": 1,
-"name": &"walk",
+"name": &"walk_left",
 "speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_y4r1p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_smehm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_d2wvv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_smehm")
+}],
+"loop": 1,
+"name": &"walk_right",
+"speed": 5.0
 }]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_01fuj"]
@@ -74,13 +98,12 @@ acceleration = 30.0
 friction = 20.0
 
 [node name="Sprite" type="AnimatedSprite3D" parent="." unique_id=1428281349]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.054, 0)
-pixel_size = 0.021
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.199, 0)
 shaded = true
 alpha_cut = 1
 texture_filter = 0
 sprite_frames = SubResource("SpriteFrames_01fuj")
-animation = &"walk"
+animation = &"walk_left"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=561696789]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.18293548, 0)
@@ -93,6 +116,7 @@ trail_distance = 1.05
 
 [node name="Sprite" type="AnimatedSprite3D" parent="PartyFollower" unique_id=1633951552]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.054, 0)
+visible = false
 pixel_size = 0.021
 shaded = true
 alpha_cut = 1
